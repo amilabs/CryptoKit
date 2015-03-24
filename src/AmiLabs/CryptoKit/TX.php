@@ -75,15 +75,15 @@ class TX {
      public static function addMultisigDataOutput($rawTXN, $data){
         $hexString = reset(unpack('H*', $data));
         $dataLength = strlen($hexString);
-        if($dataLength <= 190){
-            $hexString = str_pad($hexString, 190, '0', STR_PAD_LEFT);
+        if($dataLength <= 196){
+            $hexString = str_pad($hexString, 196, '0', STR_PAD_LEFT);
         }else{
            // data is too big
            // more outputs: todo
         }
-        $hexPart1 = substr($hexString, 0, 62);
-        $hexPart2 = substr($hexString, 62, 64);
-        $hexPart3 = substr($hexString, 126, 64);
+        $hexPart1 = substr($hexString, 0, 64);
+        $hexPart2 = substr($hexString, 64, 66);
+        $hexPart3 = substr($hexString, 130, 66);
 
         $hexString = reset(unpack('H*', chr($dataLength))) . $hexPart1 . '21' . $hexPart2 . '21' . $hexPart3;
         $aTXNunpacked = coinspark_unpack_raw_txn($rawTXN);
