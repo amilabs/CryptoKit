@@ -3,6 +3,7 @@
 namespace AmiLabs\CryptoKit;
 
 use \AmiLabs\DevKit\Registry;
+use \AmiLabs\DevKit\Cache;
 use \AmiLabs\DevKit\Logger;
 
 /**
