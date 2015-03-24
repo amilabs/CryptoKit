@@ -2,6 +2,7 @@
 
 namespace AmiLabs\CryptoKit;
 
+use \AmiLabs\DevKit\Registry;
 use \AmiLabs\DevKit\Logger;
 
 /**
