@@ -96,6 +96,8 @@ class RPC {
      * @return array
      */
     public function execCounterpartyd($command, array $aParams = array(), $logRequest = false, $cacheResponse = false){
+        return $this->exec('counterpartyd', $command, $aParams, $logRequest, $cacheResponse);
+        /*
         return $this->execCounterblockd(
             'proxy_to_counterpartyd',
             array(
@@ -105,6 +107,7 @@ class RPC {
             $logRequest,
             $cacheResponse
         );
+        */
     }
     /**
      * Execute counterblockd JSON RPC command.
