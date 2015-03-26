@@ -116,6 +116,7 @@ class RPC {
      * @param array $aParams
      * @param bool $logRequest
      * @return array
+     * @deprecated
      */
     public function execCounterblockd($command, array $aParams = array(), $logRequest = false, $cacheResponse = false){
         return $this->exec('counterblockd', $command, $aParams, $logRequest, $cacheResponse);
