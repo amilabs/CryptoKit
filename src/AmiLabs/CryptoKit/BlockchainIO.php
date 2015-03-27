@@ -6,7 +6,6 @@ use \AmiLabs\CryptoKit\RPC;
 use \AmiLabs\DevKit\Cache;
 use \AmiLabs\DevKit\Logger;
 use \AmiLabs\CryptoKit\Blockchain;
-use \AmiLabs\CryptoKit\Blockchain\Layer;
 
 /**
  * Blockchain I/O Facade.
@@ -53,24 +52,6 @@ class BlockchainIO{
     }
 
     /**
-     * Returns detailed block information.
-     *
-     * @param  int  $blockIndex   Block index
-     * @param  bool $logResult    Flag specifying to log result
-     * @param  bool $cacheResult  Flag specifying to cache result
-     * @return mixed
-     */
-    public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE){
-        return
-            $this->oLayer->execCounterpartyd(
-                'get_block_info',
-                array('block_index' => $blockIndex),
-                $logResult,
-                $cacheResult
-            );
-    }
-
-    /**
      * Returns list of block transactions.
      *
      * @param type $block
@@ -89,10 +70,65 @@ class BlockchainIO{
     }
 
     /**
+     * Returns detailed block information.
+     *
+     * @param  int  $blockIndex   Block index
+     * @param  bool $logResult    Flag specifying to log result
+     * @param  bool $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE){
+        return
+            $this->oLayer->getBlockInfo(
+                $blockIndex,
+                $logResult,
+                $cacheResult
+            );
+    }
+
+    /**
+     * Returns detailed block information.
+     *
+     * @param  int  $blockIndex   Block index
+     * @param  bool $logResult    Flag specifying to log result
+     * @param  bool $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getAssetInfoFromTxn($txnHash, $logResult = FALSE, $cacheResult = TRUE){
+        return
+            $this->oLayer->getAssetInfoFromTxn($txnHash, $logResult, $cacheResult);
+    }
+
+    /**
+     * Returns transactions from blocks filtered by passed assets.
+     *
+     * @param  array $aAssets        Assets
+     * @param  array $aBlockIndexes  Block indexes
+     * @param  bool $logResult       Flag specifying to log result
+     * @param  bool $cacheResult     Flag specifying to cache result
+     * @return mixed
+     */
+    public function getAssetsTxnsFromBlocks(
+        array $aAssets,
+        array $aBlockIndexes,
+        $logResult = FALSE,
+        $cacheResult = TRUE
+    ){
+        return
+            $this->oLayer->getAssetsTxnsFromBlocks(
+                $aAssets,
+                $aBlockIndexes,
+                $logResult,
+                $cacheResult
+            );
+    }
+
+    /**
      * Contructor.
      */
     protected function __construct(){
         $this->oRPC = new RPC();
-        $this->oLayer = new $this->layerName;
+        $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $this->layerName;
+        $this->oLayer = new $class;
     }
 }
