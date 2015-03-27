@@ -13,7 +13,7 @@ class RPC {
     /**
      * List of available services
      *
-     * @var array 
+     * @var array
      */
     private $aServices;
     /**
@@ -53,6 +53,7 @@ class RPC {
 
         // Check if daemon is known
         if(!in_array($daemon, array_keys($this->aServices))){
+            var_dump($this->aServices);###
             throw new \Exception("Unknown daemon: " . $daemon, -1);
         }
         $oLogger = null;
@@ -101,7 +102,7 @@ class RPC {
         return $this->execCounterblockd(
             'proxy_to_counterpartyd',
             array(
-                'method' => $command, 
+                'method' => $command,
                 'params' => $aParams
             ),
             $logRequest,

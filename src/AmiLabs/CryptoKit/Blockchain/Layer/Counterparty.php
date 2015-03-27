@@ -6,7 +6,8 @@ use \AmiLabs\CryptoKit\Blockchain\ILayer;
 use \AmiLabs\CryptoKit\RPC;
 use \Moontoast\Math\BigNumber;
 
-class Counterparty implements ILayer{
+class Counterparty implements ILayer
+{
     /**
      * RPC execution object
      *
@@ -14,7 +15,8 @@ class Counterparty implements ILayer{
      */
     protected $oRPC;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->oRPC = new RPC;
     }
 
@@ -26,7 +28,8 @@ class Counterparty implements ILayer{
      * @param  bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getBlockInfo($aBlockIndex, $logResult = FALSE, $cacheResult = TRUE){
+    public function getBlockInfo($aBlockIndex, $logResult = FALSE, $cacheResult = TRUE)
+    {
         return
             $this->oRPC->execCounterpartyd(
                 'get_block_info',
@@ -45,7 +48,8 @@ class Counterparty implements ILayer{
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @throws UnexpectedValueException in case of unknown transaction type
      */
-    public function getAssetInfoFromTxn($txnHash, $logResult = FALSE, $cacheResult = TRUE){
+    public function getAssetInfoFromTxn($txnHash, $logResult = FALSE, $cacheResult = TRUE)
+    {
         $data = $this->oRPC->execBitcoind(
             'getrawtransaction',
             array($txnHash),
@@ -113,7 +117,8 @@ class Counterparty implements ILayer{
         array $aBlockIndexes,
         $logResult = FALSE,
         $cacheResult = TRUE
-    ){
+    )
+    {
         $aResult = array();
         $aBlocks = $this->oRPC->execCounterpartyd(
             'get_blocks',

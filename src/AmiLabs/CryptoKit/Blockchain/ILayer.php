@@ -2,7 +2,8 @@
 
 namespace AmiLabs\CryptoKit\Blockchain;
 
-interface ILayer{
+interface ILayer
+{
     const TXN_TYPE_SEND     = 0;
     const TXN_TYPE_ISSUANCE = 20;
 
