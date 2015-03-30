@@ -23,17 +23,17 @@ class Counterparty implements ILayer
     /**
      * Returns detailed block information.
      *
-     * @param  int  $aBlockIndex   Block index
+     * @param  int  $blockIndex   Block index
      * @param  bool $logResult    Flag specifying to log result
      * @param  bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getBlockInfo($aBlockIndex, $logResult = FALSE, $cacheResult = TRUE)
+    public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
             $this->oRPC->execCounterpartyd(
                 'get_block_info',
-                array('block_index' => $aBlockIndex),
+                array('block_index' => $blockIndex),
                 $logResult,
                 $cacheResult
             );
@@ -106,10 +106,10 @@ class Counterparty implements ILayer
     /**
      * Returns transactions from blocks filtered by passed assets.
      *
-     * @param  array $aAssets        Assets
-     * @param  array $aBlockIndexes  Block indexes
-     * @param  bool $logResult       Flag specifying to log result
-     * @param  bool $cacheResult     Flag specifying to cache result
+     * @param  array $aAssets        List of assets
+     * @param  array $aBlockIndexes  List of block indexes
+     * @param  bool  $logResult      Flag specifying to log result
+     * @param  bool  $cacheResult    Flag specifying to cache result
      * @return array
      */
     public function getAssetsTxnsFromBlocks(
@@ -138,13 +138,34 @@ class Counterparty implements ILayer
                     continue;
                 }
                 $aBindings = json_decode($aBlockMessage['bindings'], TRUE);
-                if(!is_array($aBindings) || empty($aBindings['asset'])){
+                if(!is_array($aBindings)){
                     continue;
                 }
-                $asset = $aBindings['asset'];
-                if(!in_array($asset, $aAssets)){
+                $asset = '';
+                if('order_matches' != $aBlockMessage['category']){
+                    if(empty($aBindings['asset'])){
+                        continue;
+                    }
+                    $asset = $aBindings['asset'];
+                    if(!in_array($asset, $aAssets)){
+                        continue;
+                    }
+                }elseif(
+                    isset($aBindings['forward_asset']) &&
+                    in_array($aBindings['forward_asset'], $aAssets)
+                ){
+                    // selling asset
+                    $asset = $aBindings['forward_asset'];
+                }elseif(
+                    isset($aBindings['backward_asset']) &&
+                    in_array($aBindings['backward_asset'], $aAssets)
+                ){
+                    // bying asset
+                    $asset = $aBindings['backward_asset'];
+                }else{
                     continue;
                 }
+
                 if(!isset($aResult[$asset])){
                     $aResult[$asset] = array();
                 }
@@ -159,5 +180,48 @@ class Counterparty implements ILayer
         }
 
         return $aResult;
+    }
+
+
+
+    /**
+     * Returns wallets/assets balances.
+     *
+     * @param  array $aAssets          List of assets
+     * @param  array $aWallets         List of wallets
+     * @param  bool  $logResult        Flag specifying to log result
+     * @param  bool  $cacheResult      Flag specifying to cache result
+     * @return array
+     */
+    public function getBalances(
+        array $aAssets = array(),
+        array $aWallets = array(),
+        $logResult = FALSE,
+        $cacheResult = TRUE
+    ){
+        $aParams = array('filters' => array());
+        if(sizeof($aWallets)){
+            $aParams['filters'][] = array(
+                'field' => 'address',
+                'op'    => 'IN',
+                'value' => $aWallets
+            );
+        }
+        if(sizeof($aAssets)){
+            $aParams['filters'][] = array(
+                'field' => 'asset',
+                'op'    => 'IN',
+                'value' => $aAssets
+            );
+        }
+
+        $aBalances = $this->oRPC->execCounterpartyd(
+            'get_balances',
+            $aParams,
+            $logResult,
+            $cacheResult
+        );
+
+        return $aBalances;
     }
 }
