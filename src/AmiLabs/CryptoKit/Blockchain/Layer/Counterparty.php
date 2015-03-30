@@ -2,9 +2,9 @@
 
 namespace AmiLabs\CryptoKit\Blockchain\Layer;
 
-use \AmiLabs\CryptoKit\Blockchain\ILayer;
-use \AmiLabs\CryptoKit\RPC;
-use \Moontoast\Math\BigNumber;
+use AmiLabs\CryptoKit\Blockchain\ILayer;
+use AmiLabs\CryptoKit\RPC;
+use Moontoast\Math\BigNumber;
 
 class Counterparty implements ILayer
 {
@@ -147,6 +147,10 @@ class Counterparty implements ILayer
                 }
                 if(!isset($aResult[$asset])){
                     $aResult[$asset] = array();
+                }
+                if(isset($aBindings['quantity'])){
+                    preg_match('/quantity":\s*(\d+)/', $aBlockMessage['bindings'], $aMatches);
+                    $aBindings['quantity'] = $aMatches[1];
                 }
                 $aResult[$asset][] = array(
                     'bindings' => $aBindings,
