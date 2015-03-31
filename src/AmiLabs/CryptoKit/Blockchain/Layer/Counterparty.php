@@ -21,6 +21,23 @@ class Counterparty implements ILayer
     }
 
     /**
+     * Returns some operational parameters for the server.
+     *
+     * @param  bool $logResult  Flag specifying to log result
+     * @return array
+     */
+    public function getServerState($logResult = FALSE)
+    {
+        return
+            $this->oRPC->execCounterpartyd(
+                'get_running_info',
+                array(),
+                $logResult,
+                FALSE
+            );
+    }
+
+    /**
      * Returns detailed block information.
      *
      * @param  int  $blockIndex   Block index

@@ -52,6 +52,18 @@ class BlockchainIO{
     }
 
     /**
+     * Returns some operational parameters for the server.
+     *
+     * @param  bool $logResult  Flag specifying to log result
+     * @return array
+     */
+    public function getServerState($logResult = FALSE)
+    {
+        return
+            $this->oLayer->getServerState($logResult);
+    }
+
+    /**
      * Returns list of block transactions.
      *
      * @param  string $blockHash

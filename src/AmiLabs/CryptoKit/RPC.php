@@ -53,7 +53,6 @@ class RPC {
 
         // Check if daemon is known
         if(!in_array($daemon, array_keys($this->aServices))){
-            var_dump($this->aServices);###
             throw new \Exception("Unknown daemon: " . $daemon, -1);
         }
         $oLogger = null;

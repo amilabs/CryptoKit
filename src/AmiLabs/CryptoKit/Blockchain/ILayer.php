@@ -8,6 +8,14 @@ interface ILayer
     const TXN_TYPE_ISSUANCE = 20;
 
     /**
+     * Returns some operational parameters for the server.
+     *
+     * @param  bool $logResult  Flag specifying to log result
+     * @return array
+     */
+    public function getServerState($logResult = FALSE);
+
+    /**
      * Returns detailed block information.
      *
      * @param  int  $blockIndex   Block index
