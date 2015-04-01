@@ -68,13 +68,18 @@ class RPC {
         $cacheName = $daemon . '_' . $command . '_' . md5(serialize($aParams));
 
         /* @var $oCache \AmiLabs\DevKit\FileCache */
-        $oCache = Cache::get($cacheName);
-        if($cache && $oCache->exists()){
-            $aResult = unserialize($oCache->load());
-        }else{
+        if($cache){
+            $oCache = Cache::get($cacheName);
+            if($oCache->exists()){
+                $aResult = unserialize($oCache->load());
+            }
+        }
+        if(!isset($aResult)){
             try {
                 $aResult = $this->aServices[$daemon]->exec($command, $aParams, $oLogger);
-                $oCache->save(serialize($aResult));
+                if($cache){
+                    $oCache->save(serialize($aResult));
+                }
             }catch(\Exception $e){
                 if($log){
                     $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
@@ -85,6 +90,7 @@ class RPC {
         if($log){
             $oLogger->log('Result: ' . var_export($aResult, true));
         }
+
         return $aResult;
     }
     /**
