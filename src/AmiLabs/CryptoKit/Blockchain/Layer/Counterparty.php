@@ -59,23 +59,36 @@ class Counterparty implements ILayer
     /**
      * Returns asset related information from transaction.
      *
-     * @param  string $txnHash      Transaction hash
+     * @param  string $txHash       Transaction hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @throws UnexpectedValueException in case of unknown transaction type
      */
-    public function getAssetInfoFromTxn($txnHash, $logResult = FALSE, $cacheResult = TRUE)
+    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE)
     {
-        $data = $this->oRPC->execBitcoind(
+        $aData = $this->oRPC->execBitcoind(
             'getrawtransaction',
-            array($txnHash),
+            array($txHash, 1),
             $logResult,
             $cacheResult
         );
+        /*
+        $aBlock =
+            $this->oRPC->execBitcoind(
+                'getblock',
+                array($aData['blockhash']),
+                $logResult,
+                $cacheResult
+            );
+        */
+
         $aResult = $this->oRPC->execCounterpartyd(
             'get_tx_info',
-            array('tx_hex' => $data),
+            array(
+                'tx_hex'      => $aData['hex'],
+                ### 'block_index' => $aBlock['height']
+            ),
             $logResult,
             $cacheResult
         );
@@ -121,16 +134,16 @@ class Counterparty implements ILayer
     }
 
     /**
-     * Returns transactions from blocks filtered by passed assets.
+     * Returns transactions from blocks filtered by passed asset.
      *
-     * @param  array $aAssets        List of assets
-     * @param  array $aBlockIndexes  List of block indexes
-     * @param  bool  $logResult      Flag specifying to log result
-     * @param  bool  $cacheResult    Flag specifying to cache result
+     * @param  string $asset          Asset
+     * @param  array  $aBlockIndexes  List of block indexes
+     * @param  bool   $logResult      Flag specifying to log result
+     * @param  bool   $cacheResult    Flag specifying to cache result
      * @return array
      */
-    public function getAssetsTxnsFromBlocks(
-        array $aAssets,
+    public function getAssetTxsFromBlocks(
+        $asset,
         array $aBlockIndexes,
         $logResult = FALSE,
         $cacheResult = TRUE
@@ -147,52 +160,44 @@ class Counterparty implements ILayer
             if(empty($aBlock['_messages'])){
                 continue;
             }
+            file_put_contents('tx.log', print_r($aBlock['_messages'], TRUE), FILE_APPEND);###
             foreach($aBlock['_messages'] as $aBlockMessage){
-                if(
-                    empty($aBlockMessage['bindings']) ||
-                    empty($aBlockMessage['bindings'])
-                ){
+                if(empty($aBlockMessage['bindings'])){
                     continue;
                 }
                 $aBindings = json_decode($aBlockMessage['bindings'], TRUE);
                 if(!is_array($aBindings)){
                     continue;
                 }
-                $asset = '';
-                if('order_matches' != $aBlockMessage['category']){
-                    if(empty($aBindings['asset'])){
+                if('order_matches' == $aBlockMessage['category']){
+                    if(
+                        'update' != $aBlockMessage['command'] &&
+                        (
+                            !isset($aBindings['forward_asset']) ||
+                            !isset($aBindings['backward_asset']) ||
+                            (
+                                $asset != $aBindings['forward_asset'] &&
+                                $asset != $aBindings['backward_asset']
+                            )
+                        )
+                    ){
                         continue;
                     }
-                    $asset = $aBindings['asset'];
-                    if(!in_array($asset, $aAssets)){
-                        continue;
-                    }
-                }elseif(
-                    isset($aBindings['forward_asset']) &&
-                    in_array($aBindings['forward_asset'], $aAssets)
-                ){
-                    // selling asset
-                    $asset = $aBindings['forward_asset'];
-                }elseif(
-                    isset($aBindings['backward_asset']) &&
-                    in_array($aBindings['backward_asset'], $aAssets)
-                ){
-                    // bying asset
-                    $asset = $aBindings['backward_asset'];
                 }else{
-                    continue;
+                    if(
+                        empty($aBindings['asset']) ||
+                        $asset != $aBindings['asset']
+                    ){
+                        continue;
+                    }
                 }
-
-                if(!isset($aResult[$asset])){
-                    $aResult[$asset] = array();
-                }
+                // 64-bit PHP integer hack
                 if(isset($aBindings['quantity'])){
                     preg_match('/quantity":\s*(\d+)/', $aBlockMessage['bindings'], $aMatches);
                     $aBindings['quantity'] = $aMatches[1];
                 }
-                $aResult[$asset][] = array(
-                    'bindings' => $aBindings,
-                ) + $aBlockMessage;
+                $aBlockMessage['bindings'] = $aBindings;
+                $aResult[] = $aBlockMessage;
             }
         }
 
@@ -204,17 +209,15 @@ class Counterparty implements ILayer
     /**
      * Returns wallets/assets balances.
      *
-     * @param  array $aAssets          List of assets
-     * @param  array $aWallets         List of wallets
-     * @param  bool  $logResult        Flag specifying to log result
-     * @param  bool  $cacheResult      Flag specifying to cache result
+     * @param  array $aAssets    List of assets
+     * @param  array $aWallets   List of wallets
+     * @param  bool  $logResult  Flag specifying to log result
      * @return array
      */
     public function getBalances(
         array $aAssets = array(),
         array $aWallets = array(),
-        $logResult = FALSE,
-        $cacheResult = TRUE
+        $logResult = FALSE
     ){
         $aParams = array('filters' => array());
         if(sizeof($aWallets)){
@@ -236,7 +239,7 @@ class Counterparty implements ILayer
             'get_balances',
             $aParams,
             $logResult,
-            $cacheResult
+            FALSE
         );
 
         return $aBalances;

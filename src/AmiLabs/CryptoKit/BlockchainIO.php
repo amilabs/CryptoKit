@@ -101,35 +101,35 @@ class BlockchainIO{
     /**
      * Returns detailed block information.
      *
-     * @param  string $txnHash      Transaction hash
+     * @param  string $txHash       Transaction hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @return mixed
      */
-    public function getAssetInfoFromTxn($txnHash, $logResult = FALSE, $cacheResult = TRUE){
+    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE){
         return
-            $this->oLayer->getAssetInfoFromTxn($txnHash, $logResult, $cacheResult);
+            $this->oLayer->getAssetInfoFromTx($txHash, $logResult, $cacheResult);
     }
 
     /**
-     * Returns transactions from blocks filtered by passed assets.
+     * Returns transactions from blocks filtered by passed asset.
      *
-     * @param  array $aAssets        List of assets
-     * @param  array $aBlockIndexes  List of block indexes
-     * @param  bool  $logResult      Flag specifying to log result
-     * @param  bool  $cacheResult    Flag specifying to cache result
-     * @return mixed
+     * @param  string $asset          Asset
+     * @param  array  $aBlockIndexes  List of block indexes
+     * @param  bool   $logResult      Flag specifying to log result
+     * @param  bool   $cacheResult    Flag specifying to cache result
+     * @return array
      */
-    public function getAssetsTxnsFromBlocks(
-        array $aAssets,
+    public function getAssetTxsFromBlocks(
+        $asset,
         array $aBlockIndexes,
         $logResult = FALSE,
         $cacheResult = TRUE
     ){
         return
-            $this->oLayer->getAssetsTxnsFromBlocks(
-                $aAssets,
+            $this->oLayer->getAssetTxsFromBlocks(
+                $asset,
                 $aBlockIndexes,
                 $logResult,
                 $cacheResult
@@ -139,24 +139,21 @@ class BlockchainIO{
     /**
      * Returns wallets/assets balances.
      *
-     * @param  array $aAssets          List of assets
-     * @param  array $aWallets         List of wallets
-     * @param  bool  $logResult        Flag specifying to log result
-     * @param  bool  $cacheResult      Flag specifying to cache result
+     * @param  array $aAssets    List of assets
+     * @param  array $aWallets   List of wallets
+     * @param  bool  $logResult  Flag specifying to log result
      * @return array
      */
     public function getBalances(
         array $aAssets = array(),
         array $aWallets = array(),
-        $logResult = FALSE,
-        $cacheResult = TRUE
+        $logResult = FALSE
     ){
         return
             $this->oLayer->getBalances(
                 $aAssets,
                 $aWallets,
-                $logResult,
-                $cacheResult
+                $logResult
             );
     }
 
