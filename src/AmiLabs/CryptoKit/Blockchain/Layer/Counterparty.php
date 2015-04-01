@@ -8,6 +8,9 @@ use Moontoast\Math\BigNumber;
 
 class Counterparty implements ILayer
 {
+    const LAST_BLOCK_INFO_ATTEMPTS = 3;
+    const LAST_BLOCK_INFO_WAIT     = 500000; // 0.5 sec
+
     /**
      * RPC execution object
      *
@@ -15,26 +18,46 @@ class Counterparty implements ILayer
      */
     protected $oRPC;
 
+    /**
+     * Flag specifying that PHP integer is 32bit only
+     *
+     * @var bool
+     */
+    protected $is32bit;
+
     public function __construct()
     {
         $this->oRPC = new RPC;
+        $this->is32bit = PHP_INT_MAX <= 2147483647;
     }
 
     /**
      * Returns some operational parameters for the server.
      *
-     * @param  bool $logResult  Flag specifying to log result
+     * @param  bool $ignoreLastBlockInfo  Flag specifying to ignore last block info if not available
+     * @param  bool $logResult            Flag specifying to log result
      * @return array
+     * @throws RuntimeException  optionally, if last block info not available
      */
-    public function getServerState($logResult = FALSE)
+    public function getServerState($ignoreLastBlockInfo = FALSE, $logResult = FALSE)
     {
-        return
-            $this->oRPC->execCounterpartyd(
+        for($attempt = 0; $attempt < self::LAST_BLOCK_INFO_ATTEMPTS; ++$attempt){
+            $aState = $this->oRPC->execCounterpartyd(
                 'get_running_info',
                 array(),
                 $logResult,
                 FALSE
             );
+            if($ignoreLastBlockInfo || !is_null($aState['last_block'])){
+                break;
+            }
+            usleep(self::LAST_BLOCK_INFO_WAIT);
+        }
+        if(!$ignoreLastBlockInfo && is_null($aState['last_block'])){
+            throw new \RuntimeException('Cannot get last block info');
+        }
+
+        return $aState;
     }
 
     /**
@@ -160,7 +183,16 @@ class Counterparty implements ILayer
             if(empty($aBlock['_messages'])){
                 continue;
             }
-            file_put_contents('tx.log', print_r($aBlock['_messages'], TRUE), FILE_APPEND);###
+            /*
+            $aDecoded = $aBlock['_messages'];###
+            foreach($aDecoded as $index => $aDec){
+                if(isset($aDec['bindings'])){
+                    $aDecoded[$index]['bindings'] = json_decode($aDec['bindings'], TRUE);
+                }
+            }
+            file_put_contents('tx.log', print_r($aDecoded, TRUE), FILE_APPEND);###
+            unset($aDecoded);###
+            */
             foreach($aBlock['_messages'] as $aBlockMessage){
                 if(empty($aBlockMessage['bindings'])){
                     continue;
@@ -169,30 +201,43 @@ class Counterparty implements ILayer
                 if(!is_array($aBindings)){
                     continue;
                 }
-                if('order_matches' == $aBlockMessage['category']){
-                    if(
-                        'update' != $aBlockMessage['command'] &&
-                        (
-                            !isset($aBindings['forward_asset']) ||
-                            !isset($aBindings['backward_asset']) ||
+                switch($aBlockMessage['category']){
+                    case 'order_matches':
+                        if(
+                            'update' != $aBlockMessage['command'] &&
                             (
-                                $asset != $aBindings['forward_asset'] &&
-                                $asset != $aBindings['backward_asset']
+                                !isset($aBindings['forward_asset']) ||
+                                !isset($aBindings['backward_asset']) ||
+                                (
+                                    $asset != $aBindings['forward_asset'] &&
+                                    $asset != $aBindings['backward_asset']
+                                )
                             )
-                        )
-                    ){
-                        continue;
-                    }
-                }else{
-                    if(
-                        empty($aBindings['asset']) ||
-                        $asset != $aBindings['asset']
-                    ){
-                        continue;
-                    }
+                        ){
+                            continue 2;
+                        }
+                        break;
+                    case 'orders':
+                        if(
+                            (
+                                'insert' == $aBlockMessage['command'] &&
+                                isset($aBindings['give_asset']) &&
+                                $asset != $aBindings['give_asset']
+                            )
+                        ){
+                            continue 2;
+                        }
+                        break;
+                    default:
+                        if(
+                            empty($aBindings['asset']) ||
+                            $asset != $aBindings['asset']
+                        ){
+                            continue 2;
+                        }
                 }
                 // 64-bit PHP integer hack
-                if(isset($aBindings['quantity'])){
+                if($this->is32bit && isset($aBindings['quantity'])){
                     preg_match('/quantity":\s*(\d+)/', $aBlockMessage['bindings'], $aMatches);
                     $aBindings['quantity'] = $aMatches[1];
                 }

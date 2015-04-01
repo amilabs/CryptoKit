@@ -54,13 +54,14 @@ class BlockchainIO{
     /**
      * Returns some operational parameters for the server.
      *
-     * @param  bool $logResult  Flag specifying to log result
+     * @param  bool $ignoreLastBlockInfo  Flag specifying to ignore last block info if not available
+     * @param  bool $logResult            Flag specifying to log result
      * @return array
      */
-    public function getServerState($logResult = FALSE)
+    public function getServerState($ignoreLastBlockInfo = FALSE, $logResult = FALSE)
     {
         return
-            $this->oLayer->getServerState($logResult);
+            $this->oLayer->getServerState($ignoreLastBlockInfo, $logResult);
     }
 
     /**
