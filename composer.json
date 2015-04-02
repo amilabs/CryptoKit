@@ -15,7 +15,7 @@
         "php": ">=5.3.1",
         "fguillot/json-rpc": "dev-master",
         "artemko7v/php-op_return": "dev-master",
-        "moontoast/math": "*",
+        "moontoast/math": "*"
     },
     "autoload": {
         "psr-0": {"AmiLabs\\CryptoKit": "src/"}
