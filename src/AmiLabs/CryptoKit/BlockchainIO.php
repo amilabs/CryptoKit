@@ -140,23 +140,41 @@ class BlockchainIO{
     /**
      * Returns wallets/assets balances.
      *
-     * @param  array $aAssets    List of assets
-     * @param  array $aWallets   List of wallets
-     * @param  bool  $logResult  Flag specifying to log result
+     * @param  array $aAssets       List of assets
+     * @param  array $aWallets      List of wallets
+     * @param  array $aExtraParams  Extra params
+     * @param  bool  $logResult     Flag specifying to log result
      * @return array
      */
     public function getBalances(
         array $aAssets = array(),
         array $aWallets = array(),
+        array $aExtraParams = array(),
         $logResult = FALSE
     ){
         return
             $this->oLayer->getBalances(
                 $aAssets,
                 $aWallets,
+                $aExtraParams,
                 $logResult
             );
     }
+
+    /**
+     * Returns wallets/assets balances from database.
+     *
+     * @param  array $aAssets   List of assets
+     * @param  array $aWallets  List of wallets
+     * @return array
+     */
+    /*
+    public function getBalancesFromDB(array $aAssets = array(),array $aWallets = array())
+    {
+        return
+            $this->oLayer->getBalancesFromDB($aAssets, $aWallets);
+    }
+    */
 
     /**
      * Contructor.

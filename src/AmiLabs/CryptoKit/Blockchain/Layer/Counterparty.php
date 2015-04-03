@@ -5,11 +5,12 @@ namespace AmiLabs\CryptoKit\Blockchain\Layer;
 use AmiLabs\CryptoKit\Blockchain\ILayer;
 use AmiLabs\CryptoKit\RPC;
 use Moontoast\Math\BigNumber;
+use AmiLabs\DevKit\Registry;
 
 class Counterparty implements ILayer
 {
-    const LAST_BLOCK_INFO_ATTEMPTS = 3;
-    const LAST_BLOCK_INFO_WAIT     = 500000; // 0.5 sec
+    const LAST_BLOCK_INFO_ATTEMPTS = 7;
+    const LAST_BLOCK_INFO_WAIT     = 2000000; // 2.0 sec
 
     /**
      * RPC execution object
@@ -24,6 +25,13 @@ class Counterparty implements ILayer
      * @var bool
      */
     protected $is32bit;
+
+    /**
+     * Database connection object
+     *
+     * @var \PDO
+     */
+    protected $oDB;
 
     public function __construct()
     {
@@ -190,10 +198,11 @@ class Counterparty implements ILayer
                     $aDecoded[$index]['bindings'] = json_decode($aDec['bindings'], TRUE);
                 }
             }
-            file_put_contents('tx.log', print_r($aDecoded, TRUE), FILE_APPEND);###
+            file_put_contents("{$asset}.tx.log", print_r($aDecoded, TRUE), FILE_APPEND);###
             unset($aDecoded);###
             */
             foreach($aBlock['_messages'] as $aBlockMessage){
+                // if(in_array($aBlockMessage['block_index'], array(311579, 323002, 331597))){file_put_contents('block.log', print_r($aBlockMessage, TRUE), FILE_APPEND);}###
                 if(empty($aBlockMessage['bindings'])){
                     continue;
                 }
@@ -237,9 +246,23 @@ class Counterparty implements ILayer
                         }
                 }
                 // 64-bit PHP integer hack
-                if($this->is32bit && isset($aBindings['quantity'])){
-                    preg_match('/quantity":\s*(\d+)/', $aBlockMessage['bindings'], $aMatches);
-                    $aBindings['quantity'] = $aMatches[1];
+                if($this->is32bit){
+                    foreach(
+                        array(
+                            'quantity',
+                            'give_quantity',
+                            'give_remaining',
+                            'get_quantity',
+                            'get_remaining',
+                            'forward_quantity',
+                            'backward_quantity'
+                        ) as $key
+                    ){
+                        if(isset($aBindings[$key])){
+                            preg_match('/' . $key . '":\s*(-?\d+)[^0-9]/', $aBlockMessage['bindings'], $aMatches);
+                            $aBindings[$key] = $aMatches[1];
+                        }
+                    }
                 }
                 $aBlockMessage['bindings'] = $aBindings;
                 $aResult[] = $aBlockMessage;
@@ -249,19 +272,19 @@ class Counterparty implements ILayer
         return $aResult;
     }
 
-
-
     /**
      * Returns wallets/assets balances.
      *
-     * @param  array $aAssets    List of assets
-     * @param  array $aWallets   List of wallets
-     * @param  bool  $logResult  Flag specifying to log result
+     * @param  array $aAssets       List of assets
+     * @param  array $aWallets      List of wallets
+     * @param  array $aExtraParams  Extra params
+     * @param  bool  $logResult     Flag specifying to log result
      * @return array
      */
     public function getBalances(
         array $aAssets = array(),
         array $aWallets = array(),
+        array $aExtraParams = array(),
         $logResult = FALSE
     ){
         $aParams = array('filters' => array());
@@ -282,11 +305,66 @@ class Counterparty implements ILayer
 
         $aBalances = $this->oRPC->execCounterpartyd(
             'get_balances',
-            $aParams,
+            $aParams + $aExtraParams,
             $logResult,
             FALSE
         );
 
         return $aBalances;
     }
+
+    /**
+     * Returns wallets/assets balances from database.
+     *
+     * @param  array $aAssets   List of assets
+     * @param  array $aWallets  List of wallets
+     * @return array
+     * @todo   Use PDO prepared statements
+     */
+    /*
+    public function getBalancesFromDB(array $aAssets = array(),array $aWallets = array())
+    {
+        $this->connectToDB();
+
+        $where = '';
+        if(sizeof($aWallets)){
+            $where .= " AND address IN ('" . implode("', '", $aWallets) . "')";
+        }
+        if(sizeof($aAssets)){
+            $where .= " AND asset IN ('" . implode("', '", $aAssets) . "')";
+        }
+        if('' != $where){
+            $where = "WHERE 1" . $where;
+        }
+        $oStmt = $this->oDB->query(
+            "SELECT * " .
+            "FROM balances " .
+            $where
+        );
+
+        return $oStmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    */
+
+    /**
+     * Connects to counterparty database.
+     *
+     * @return void
+     */
+    /*
+    protected function connectToDB()
+    {
+        if(is_object($this->oDB)){
+            return;
+        }
+        $aDB = Registry::useStorage('CFG')->get('db');
+        $aDB = $aDB['counterpartyd'];
+        $this->oDB = new \PDO(
+            $aDB['dsn'],
+            $aDB['username'],
+            $aDB['password'],
+            $aDB['options']
+        );
+    }
+    */
 }
