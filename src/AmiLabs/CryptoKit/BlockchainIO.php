@@ -52,6 +52,17 @@ class BlockchainIO{
     }
 
     /**
+     * Checks if server with specified configuration is alive.
+     *
+     * @param array $aConfig  Server configuration array
+     * @return bool
+     */
+    public function checkServerConfig(array $aConfig){
+        return
+            $this->oLayer->checkServerConfig($aConfig);
+    }
+
+    /**
      * Returns some operational parameters for the server.
      *
      * @param  bool $ignoreLastBlockInfo  Flag specifying to ignore last block info if not available
@@ -181,6 +192,10 @@ class BlockchainIO{
      */
     protected function __construct(){
         $this->oRPC = new RPC();
+        $cfgLayer = Registry::useStorage('CFG')->get('CryptoKit/layer', FALSE);
+        if($cfgLayer !== FALSE){
+            $this->layerName = $cfgLayer;
+        }
         $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $this->layerName;
         $this->oLayer = new $class;
     }

@@ -5,11 +5,16 @@ namespace AmiLabs\CryptoKit;
 use \AmiLabs\DevKit\Registry;
 use \AmiLabs\DevKit\Cache;
 use \AmiLabs\DevKit\Logger;
+use \AmiLabs\CryptoKit\BlockchainIO;
 
 /**
  * Class for JSON RPC execution.
  */
 class RPC {
+    /**
+     * Default protocol for RPC services
+     */
+    const DEFAULT_PROTOCOL = 'https';
     /**
      * List of available services
      *
@@ -25,8 +30,9 @@ class RPC {
     /**
      * Constructor.
      */
-    public function __construct(){
-        $this->aConfig = Registry::useStorage('CFG')->get('RPCServices');
+    public function __construct($checkServices = true){
+        $this->aConfig = Registry::useStorage('CFG')->get('RPCServices', FALSE);
+
         foreach($this->aConfig as $daemon => $aDaemonConfig){
             if(strpos($aDaemonConfig['driver'], '\\') !== FALSE){
                 $className = $aDaemonConfig['driver'];
@@ -39,6 +45,46 @@ class RPC {
                 throw new \Exception('RPC driver class ' . $className . ' not found');
             }
         }
+    }
+    /**
+     * Reads RPC services configuration from global config.
+     *
+     * @param mixed $checkServices
+     */
+    protected function getConfiguration($checkServices){
+        $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
+
+        if(is_array($aConfigs)){
+            $oLogger = Logger::get('check-servers');
+            // Get working config
+            foreach($aConfigs as $aConfig){
+                $address = isset($aConfig['address']) ? $aConfig['address'] : FALSE;
+                if(FALSE == address){
+                    continue;
+                }
+                if(strpos($address, 'http') !== 0){
+                    $address = self::DEFAULT_PROTOCOL . '://' . $address;
+                }
+                $aConfig['address'] = $address;
+                if($checkServices){
+                    // Check if service is working
+                    if(!BlockchainIO::getInstance()->checkServerConfig($aConfig)){
+                        $oLogger->log('ERROR: ' . $aConfig['address'] . ' is DOWN, skipping');
+                        continue;
+                    }
+                }
+                break;
+            }
+            $address = isset($this->aConfig['address']);
+        }else{
+            // Old Style Config (todo: deprecate)
+            $aConfig = Registry::useStorage('CFG')->get('RPCServices', FALSE);
+        }
+        if(!is_array($aConfig)){
+            throw new \Exception('Blockchain RPC configuration missing');
+        }
+        $oLogger->log('USING: ' . $aConfig['address'] . ' as primary');
+        $this->aConfig = $aConfig;
     }
     /**
      * Execute JSON RPC command.

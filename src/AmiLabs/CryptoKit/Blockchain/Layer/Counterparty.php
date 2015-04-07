@@ -40,6 +40,27 @@ class Counterparty implements ILayer
     }
 
     /**
+     * Checks if Counterparty server is up and running.
+     *
+     * @param array $aConfig  Server configuration
+     * @return bool
+     */
+    public function checkServerConfig(array $aConfig){
+        $result = TRUE;
+        // Can not check state without Counterblock
+        if(isset($aConfig['counterblockd'])){
+            $state = file_get_contents($aConfig['counterblockd']['address']);
+            if(!($aState = json_decode($state, TRUE))){
+                $result = FALSE;
+            }else{
+                // Check if Counterparty state is OK
+                $result = isset($aState['counterparty-server']) && ($aState['counterparty-server'] == 'OK');
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Returns some operational parameters for the server.
      *
      * @param  bool $ignoreLastBlockInfo  Flag specifying to ignore last block info if not available
