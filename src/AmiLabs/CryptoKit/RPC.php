@@ -31,8 +31,7 @@ class RPC {
      * Constructor.
      */
     public function __construct($checkServices = true){
-        $this->aConfig = Registry::useStorage('CFG')->get('RPCServices', FALSE);
-
+        $this->loadConfiguration($checkServices);
         foreach($this->aConfig as $daemon => $aDaemonConfig){
             if(strpos($aDaemonConfig['driver'], '\\') !== FALSE){
                 $className = $aDaemonConfig['driver'];
@@ -51,7 +50,7 @@ class RPC {
      *
      * @param mixed $checkServices
      */
-    protected function getConfiguration($checkServices){
+    protected function loadConfiguration($checkServices){
         $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
 
         if(is_array($aConfigs)){
