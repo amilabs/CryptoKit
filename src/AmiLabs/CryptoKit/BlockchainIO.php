@@ -4,6 +4,7 @@ namespace AmiLabs\CryptoKit;
 
 use \AmiLabs\CryptoKit\RPC;
 use \AmiLabs\DevKit\Cache;
+use \AmiLabs\DevKit\Registry;
 use \AmiLabs\DevKit\Logger;
 use \AmiLabs\CryptoKit\Blockchain;
 
@@ -84,6 +85,7 @@ class BlockchainIO{
      * @return mixed
      */
     public function getBlock($blockHash, $logResult = false, $cacheResult = true){
+        $this->oRPC = new RPC();
         return
             $this->oRPC->execBitcoind(
                 'getblock',
@@ -191,7 +193,6 @@ class BlockchainIO{
      * Contructor.
      */
     protected function __construct(){
-        $this->oRPC = new RPC();
         $cfgLayer = Registry::useStorage('CFG')->get('CryptoKit/layer', FALSE);
         if($cfgLayer !== FALSE){
             $this->layerName = $cfgLayer;

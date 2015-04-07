@@ -13,8 +13,10 @@ use \AmiLabs\CryptoKit\BlockchainIO;
 class RPC {
     /**
      * Default protocol for RPC services
+     *
+     * @todo: use HTTPS
      */
-    const DEFAULT_PROTOCOL = 'https';
+    const DEFAULT_PROTOCOL = 'http';
     /**
      * List of available services
      *
@@ -26,13 +28,15 @@ class RPC {
      *
      * @var array
      */
-    private $aConfig;
+    private static $aConfig;
     /**
      * Constructor.
      */
     public function __construct($checkServices = true){
-        $this->loadConfiguration($checkServices);
-        foreach($this->aConfig as $daemon => $aDaemonConfig){
+        if(is_null(self::$aConfig)){
+            $this->loadConfiguration($checkServices);
+        }
+        foreach(self::$aConfig as $daemon => $aDaemonConfig){
             if(strpos($aDaemonConfig['driver'], '\\') !== FALSE){
                 $className = $aDaemonConfig['driver'];
             }else{
@@ -57,24 +61,28 @@ class RPC {
             $oLogger = Logger::get('check-servers');
             // Get working config
             foreach($aConfigs as $aConfig){
-                $address = isset($aConfig['address']) ? $aConfig['address'] : FALSE;
-                if(FALSE == $address){
-                    continue;
+                foreach($aConfig as $daemon => $aDaemonConfig){
+                    $address = isset($aDaemonConfig['address']) ? $aDaemonConfig['address'] : FALSE;
+                    if(strpos($address, 'http') !== 0){
+                        $address = self::DEFAULT_PROTOCOL . '://' . $address;
+                    }
+                    $aDaemonConfig['address'] = $address;
+                    if(!isset($aDaemonConfig['driver'])){
+                        $aDaemonConfig['driver'] = 'json';
+                    }
+                    $aConfig[$daemon] = $aDaemonConfig;
                 }
-                if(strpos($address, 'http') !== 0){
-                    $address = self::DEFAULT_PROTOCOL . '://' . $address;
-                }
-                $aConfig['address'] = $address;
                 if($checkServices){
                     // Check if service is working
                     if(!BlockchainIO::getInstance()->checkServerConfig($aConfig)){
                         $oLogger->log('ERROR: ' . $aConfig['address'] . ' is DOWN, skipping');
-                        continue;
+                    }else{
+                        break;
                     }
+                }else{
+                    break;
                 }
-                break;
             }
-            $address = isset($this->aConfig['address']);
         }else{
             // Old Style Config (todo: deprecate)
             $aConfig = Registry::useStorage('CFG')->get('RPCServices', FALSE);
@@ -82,8 +90,10 @@ class RPC {
         if(!is_array($aConfig)){
             throw new \Exception('Blockchain RPC configuration missing');
         }
+        var_dump($aConfig);
+        die();
         $oLogger->log('USING: ' . $aConfig['address'] . ' as primary');
-        $this->aConfig = $aConfig;
+        self::$aConfig = $aConfig;
     }
     /**
      * Execute JSON RPC command.
