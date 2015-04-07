@@ -90,8 +90,6 @@ class RPC {
         if(!is_array($aConfig)){
             throw new \Exception('Blockchain RPC configuration missing');
         }
-        var_dump($aConfig);
-        die();
         $oLogger->log('USING: ' . $aConfig['address'] . ' as primary');
         self::$aConfig = $aConfig;
     }

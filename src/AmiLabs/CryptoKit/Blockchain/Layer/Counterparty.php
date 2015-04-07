@@ -55,8 +55,9 @@ class Counterparty implements ILayer
         $result = TRUE;
         // Can not check state without Counterblock
         if(isset($aConfig['counterblockd'])){
-            $state = file_get_contents($aConfig['counterblockd']['address']);
-            if(!($aState = json_decode($state, TRUE))){
+            // todo: use CURL to avoid warnings and to use SSL
+            $state = @file_get_contents($aConfig['counterblockd']['address']);
+            if(!($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)))){
                 $result = FALSE;
             }else{
                 // Check if Counterparty state is OK
