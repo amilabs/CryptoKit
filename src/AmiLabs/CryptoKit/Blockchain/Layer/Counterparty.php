@@ -4,8 +4,8 @@ namespace AmiLabs\CryptoKit\Blockchain\Layer;
 
 use AmiLabs\CryptoKit\Blockchain\ILayer;
 use AmiLabs\CryptoKit\RPC;
-use AmiLabs\CryptoKit\Logger;
 use Moontoast\Math\BigNumber;
+use AmiLabs\DevKit\Logger;
 use AmiLabs\DevKit\Registry;
 
 class Counterparty implements ILayer
