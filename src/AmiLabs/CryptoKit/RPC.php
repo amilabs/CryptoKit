@@ -58,7 +58,6 @@ class RPC {
         $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
 
         if(is_array($aConfigs)){
-            $oLogger = Logger::get('check-servers');
             // Get working config
             foreach($aConfigs as $aConfig){
                 foreach($aConfig as $daemon => $aDaemonConfig){
@@ -74,9 +73,7 @@ class RPC {
                 }
                 if($checkServices){
                     // Check if service is working
-                    if(!BlockchainIO::getInstance()->checkServerConfig($aConfig)){
-                        $oLogger->log('ERROR: ' . $aConfig['address'] . ' is DOWN, skipping');
-                    }else{
+                    if(BlockchainIO::getInstance()->checkServerConfig($aConfig)){
                         break;
                     }
                 }else{
@@ -90,7 +87,6 @@ class RPC {
         if(!is_array($aConfig)){
             throw new \Exception('Blockchain RPC configuration missing');
         }
-        $oLogger->log('USING: ' . $aConfig['address'] . ' as primary');
         self::$aConfig = $aConfig;
     }
     /**

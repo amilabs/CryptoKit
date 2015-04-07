@@ -4,6 +4,7 @@ namespace AmiLabs\CryptoKit\Blockchain\Layer;
 
 use AmiLabs\CryptoKit\Blockchain\ILayer;
 use AmiLabs\CryptoKit\RPC;
+use AmiLabs\CryptoKit\Logger;
 use Moontoast\Math\BigNumber;
 use AmiLabs\DevKit\Registry;
 
@@ -55,13 +56,17 @@ class Counterparty implements ILayer
         $result = TRUE;
         // Can not check state without Counterblock
         if(isset($aConfig['counterblockd'])){
+            $oLogger = Logger::get('check-servers');
+            $address = $aConfig['counterblockd']['address'];
             // todo: use CURL to avoid warnings and to use SSL
-            $state = @file_get_contents($aConfig['counterblockd']['address']);
+            $state = @file_get_contents($address);
             if(!($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)))){
+                $oLogger->log('ERROR: ' . $address . ' is DOWN, skipping');
                 $result = FALSE;
             }else{
                 // Check if Counterparty state is OK
                 $result = isset($aState['counterparty-server']) && ($aState['counterparty-server'] == 'OK');
+                $oLogger->log('OK: ' . $address . ' is UP and RUNNING, using as primary');
             }
         }
         return $result;
