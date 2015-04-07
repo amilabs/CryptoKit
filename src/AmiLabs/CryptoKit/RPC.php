@@ -58,7 +58,7 @@ class RPC {
             // Get working config
             foreach($aConfigs as $aConfig){
                 $address = isset($aConfig['address']) ? $aConfig['address'] : FALSE;
-                if(FALSE == address){
+                if(FALSE == $address){
                     continue;
                 }
                 if(strpos($address, 'http') !== 0){
