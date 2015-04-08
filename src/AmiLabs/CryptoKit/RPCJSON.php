@@ -22,8 +22,9 @@ class RPCJSON extends RPCServiceClient{
      */
     public function __construct(array $aConfig){
         $this->oClient = new Client($aConfig['address']);
+        $this->oClient->ssl_verify_peer = false;
         if(isset($aConfig['login']) && isset($aConfig['password'])){
-            $this->oClient->authentication($aConfig['login'], $aConfig['password']);                
+            $this->oClient->authentication($aConfig['login'], $aConfig['password']);
         }
     }
     /**
