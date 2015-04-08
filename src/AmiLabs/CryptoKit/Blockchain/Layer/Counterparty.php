@@ -58,8 +58,13 @@ class Counterparty implements ILayer
         if(isset($aConfig['counterblockd'])){
             $oLogger = Logger::get('check-servers');
             $address = $aConfig['counterblockd']['address'];
-            // todo: use CURL to avoid warnings and to use SSL
-            $state = @file_get_contents($address);
+            $aContextOptions = array(
+                "ssl" => array(
+                    "verify_peer" => FALSE,
+                    "verify_peer_name" => FALSE,
+                )
+            );
+            $state = @file_get_contents($address, FALSE, stream_context_create($aContextOptions));
             if(!($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)))){
                 $oLogger->log('ERROR: ' . $address . ' is DOWN, skipping');
                 $result = FALSE;

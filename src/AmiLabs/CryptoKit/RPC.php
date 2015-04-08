@@ -16,7 +16,7 @@ class RPC {
      *
      * @todo: use HTTPS
      */
-    const DEFAULT_PROTOCOL = 'http';
+    const DEFAULT_PROTOCOL = 'https';
     /**
      * List of available services
      *
@@ -58,26 +58,42 @@ class RPC {
         $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
 
         if(is_array($aConfigs)){
-            // Get working config
-            foreach($aConfigs as $aConfig){
-                foreach($aConfig as $daemon => $aDaemonConfig){
-                    $address = isset($aDaemonConfig['address']) ? $aDaemonConfig['address'] : FALSE;
-                    if(strpos($address, 'http') !== 0){
-                        $address = self::DEFAULT_PROTOCOL . '://' . $address;
-                    }
-                    $aDaemonConfig['address'] = $address;
-                    if(!isset($aDaemonConfig['driver'])){
-                        $aDaemonConfig['driver'] = 'json';
-                    }
-                    $aConfig[$daemon] = $aDaemonConfig;
-                }
+            $needToSearchConfig = true;
+            $oCache = Cache::get('rpc-service');
+            if($oCache->exists()){
+                $aConfig = unserialize($oCache->load());
                 if($checkServices){
                     // Check if service is working
                     if(BlockchainIO::getInstance()->checkServerConfig($aConfig)){
+                        $needToSearchConfig = false;
+                    }else{
+                        $oCache->clear();
+                    }
+                }
+            }
+            if($needToSearchConfig){
+                // Get working config
+                foreach($aConfigs as $aConfig){
+                    foreach($aConfig as $daemon => $aDaemonConfig){
+                        $address = isset($aDaemonConfig['address']) ? $aDaemonConfig['address'] : FALSE;
+                        if(strpos($address, 'http') !== 0){
+                            $address = self::DEFAULT_PROTOCOL . '://' . $address;
+                        }
+                        $aDaemonConfig['address'] = $address;
+                        if(!isset($aDaemonConfig['driver'])){
+                            $aDaemonConfig['driver'] = 'json';
+                        }
+                        $aConfig[$daemon] = $aDaemonConfig;
+                    }
+                    if($checkServices){
+                        // Check if service is working
+                        if(BlockchainIO::getInstance()->checkServerConfig($aConfig)){
+                            $oCache->save(serialize($aConfig));
+                            break;
+                        }
+                    }else{
                         break;
                     }
-                }else{
-                    break;
                 }
             }
         }else{
@@ -109,7 +125,7 @@ class RPC {
             /* @var $oLogger \AmiLabs\Logger */
             $oLogger = Logger::get('rpc-' . $daemon);
             $oLogger->log(Logger::DELIMITER);
-            $oLogger->log('Call to: ' . $daemon . ' (' . $this->aConfig[$daemon]['address'] .')');
+            $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
             $oLogger->log('Execute command: ' . $command);
             $oLogger->log('Params: ' . var_export($aParams, true));
 
