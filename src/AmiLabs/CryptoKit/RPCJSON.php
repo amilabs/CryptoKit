@@ -2,7 +2,6 @@
 
 namespace AmiLabs\CryptoKit;
 
-use \Deepelopment\Net\RPC;
 use \AmiLabs\CryptoKit\IRPCServiceClient;
 use \AmiLabs\CryptoKit\RPCServiceClient;
 
@@ -22,9 +21,9 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
      * @param array $aConfig  Driver configuration
      */
     public function __construct(array $aConfig){
-        $oRPCClient = new RPC(
+        $oRPCClient = new \Deepelopment\Net\RPC(
             'JSON',
-            RPC::TYPE_CLIENT,
+            \Deepelopment\Net\RPC::TYPE_CLIENT,
             array(
                 CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
                 CURLOPT_SSL_VERIFYHOST => FALSE
