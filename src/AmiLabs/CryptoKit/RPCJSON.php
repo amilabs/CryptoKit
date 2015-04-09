@@ -2,7 +2,7 @@
 
 namespace AmiLabs\CryptoKit;
 
-use \JsonRPC\Client;
+use \Deepelopment\Net\RPC;
 use \AmiLabs\CryptoKit\RPCServiceClient;
 
 /**
@@ -21,11 +21,16 @@ class RPCJSON extends RPCServiceClient{
      * @param array $aConfig  Driver configuration
      */
     public function __construct(array $aConfig){
-        $this->oClient = new Client($aConfig['address']);
-        $this->oClient->ssl_verify_peer = false;
-        if(isset($aConfig['login']) && isset($aConfig['password'])){
-            $this->oClient->authentication($aConfig['login'], $aConfig['password']);
-        }
+        $oRPCClient = new RPC(
+            'JSON',
+            RPC::TYPE_CLIENT,
+            array(
+                CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
+                CURLOPT_SSL_VERIFYHOST => FALSE
+            )
+        );
+        $this->oClient = $oRPCClient->getLayer();
+        $this->oClient->open($aConfig['address']);
     }
     /**
      * Execute JSON RPC command.
