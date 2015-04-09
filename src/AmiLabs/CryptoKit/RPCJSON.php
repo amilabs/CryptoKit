@@ -2,12 +2,14 @@
 
 namespace AmiLabs\CryptoKit;
 
+use \Deepelopment\Net\RPC;
+use \AmiLabs\CryptoKit\IRPCServiceClient;
 use \AmiLabs\CryptoKit\RPCServiceClient;
 
 /**
  * Class for JSON RPC execution.
  */
-class RPCJSON extends RPCServiceClient{
+class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
     /**
      * JSON RPC Client object
      *
@@ -20,7 +22,7 @@ class RPCJSON extends RPCServiceClient{
      * @param array $aConfig  Driver configuration
      */
     public function __construct(array $aConfig){
-        $oRPCClient = new \Deepelopment\Net\RPC(
+        $oRPCClient = new RPC(
             'JSON',
             RPC::TYPE_CLIENT,
             array(
