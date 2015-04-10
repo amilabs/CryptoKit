@@ -18,6 +18,10 @@ class RPC {
      */
     const DEFAULT_PROTOCOL = 'https';
     /**
+     * Configuration check interval
+     */
+    const CHECK_INTERVAL = 600; // 20 minutes
+    /**
      * List of available services
      *
      * @var array
@@ -60,8 +64,8 @@ class RPC {
         if(is_array($aConfigs)){
             $needToSearchConfig = true;
             $oCache = Cache::get('rpc-service');
-            if($oCache->exists()){
-                $aConfig = unserialize($oCache->load());
+            if($oCache->exists() && !$oCache->clearIfOlderThan(self::CHECK_INTERVAL)){
+                $aConfig = $oCache->load();
                 if($checkServices){
                     // Check if service is working
                     if(BlockchainIO::getInstance()->checkServerConfig($aConfig)){
@@ -88,7 +92,7 @@ class RPC {
                     if($checkServices){
                         // Check if service is working
                         if(BlockchainIO::getInstance()->checkServerConfig($aConfig)){
-                            $oCache->save(serialize($aConfig));
+                            $oCache->save($aConfig);
                             break;
                         }
                     }else{
@@ -136,14 +140,14 @@ class RPC {
         if($cache){
             $oCache = Cache::get($cacheName);
             if($oCache->exists()){
-                $aResult = unserialize($oCache->load());
+                $aResult = $oCache->load();
             }
         }
         if(!isset($aResult)){
             try {
                 $aResult = $this->aServices[$daemon]->exec($command, $aParams, $oLogger);
                 if($cache){
-                    $oCache->save(serialize($aResult));
+                    $oCache->save($aResult);
                 }
             }catch(\Exception $e){
                 if($log){
@@ -165,6 +169,7 @@ class RPC {
      * @param array $aParams
      * @param bool $logRequest
      * @return array
+     * @deprecated
      */
     public function execCounterpartyd($command, array $aParams = array(), $logRequest = false, $cacheResponse = false){
         return $this->exec('counterpartyd', $command, $aParams, $logRequest, $cacheResponse);
@@ -200,6 +205,7 @@ class RPC {
      * @param moxed $aParams
      * @param bool $logRequest
      * @return array
+     * @deprecated
      */
     public function execBitcoind($command, $aParams = array(), $logRequest = false, $cacheResponse = false){
         return $this->exec('bitcoind', $command, $aParams, $logRequest, $cacheResponse);
