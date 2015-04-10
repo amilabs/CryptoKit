@@ -165,7 +165,7 @@ class Counterparty implements ILayer
      * @param bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getRawTransaction($txHash, $extended = TRUE, $logResult = FALSE, $cacheResult = TRUE)
+    public function getRawTransaction($txHash, $extended = FALSE, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
             $this->getRPC()->exec(
