@@ -127,12 +127,8 @@ class Counterparty implements ILayer
      */
     public function getBlock($blockHash, $logResult = false, $cacheResult = true)
     {
-        if(!$this->oRPC){
-            $this->oRPC = new RPC;
-        }
-
         return
-            $this->oRPC->exec(
+            $this->getRPC()->exec(
                 'bitcoind',
                 'getblock',
                 array($blockHash),
@@ -172,7 +168,7 @@ class Counterparty implements ILayer
     public function getRawTransaction($txHash, $extended = TRUE, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
-            getRPC()->exec(
+            $this->getRPC()->exec(
                 'bitcoind',
                 'getrawtransaction',
                 array($txHash, (int)!!$extended),
@@ -420,6 +416,35 @@ class Counterparty implements ILayer
         return $aBalances;
     }
 
+    /**
+     * Sends specified amount of asset from source to destination.
+     *
+     * @param string $source       Source address
+     * @param string $destination  Destination address
+     * @param string $asset        Asset name
+     * @param int $amount          Amount (in satoshi)
+     * @param array $aPublicKeys   List of public keys of all addresses
+     * @param bool $logResult      Flag specifying to log result
+     * @return mixed
+     */
+    public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE){
+        return
+            $this->getRPC()->exec(
+                'counterpartyd',
+                'create_send',
+                array(
+                    "asset"                     => $asset,
+                    "source"                    => $source,
+                    "destination"               => $destination,
+                    "quantity"                  => (int)$amount,
+                    "allow_unconfirmed_inputs"  => true,
+                    "encoding"                  => "multisig",
+                    "pubkey"                    => $aPubKeys
+                ),
+                $logResult,
+                FALSE // Sends are always not cached
+            );
+    }
     /**
      * Returns wallets/assets balances from database.
      *
