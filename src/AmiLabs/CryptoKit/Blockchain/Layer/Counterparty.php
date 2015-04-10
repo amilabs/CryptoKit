@@ -34,14 +34,23 @@ class Counterparty implements ILayer
      */
     protected $oDB;
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         $this->is32bit = PHP_INT_MAX <= 2147483647;
     }
 
-    protected function getRPC(){
+    /**
+     * Creates new RPC object, or uses existing one.
+     *
+     * @return \AmiLabs\CryptoKit\RPC
+     */
+    protected function getRPC()
+    {
         if(is_null($this->oRPC)){
-        $this->oRPC = new RPC;
+            $this->oRPC = new RPC;
         }
         return $this->oRPC;
     }
@@ -52,7 +61,8 @@ class Counterparty implements ILayer
      * @param array $aConfig  Server configuration
      * @return bool
      */
-    public function checkServerConfig(array $aConfig){
+    public function checkServerConfig(array $aConfig)
+    {
         $result = TRUE;
         // Can not check state without Counterblock
         if(isset($aConfig['counterblockd'])){
@@ -88,7 +98,8 @@ class Counterparty implements ILayer
     public function getServerState($ignoreLastBlockInfo = FALSE, $logResult = FALSE)
     {
         for($attempt = 0; $attempt < self::LAST_BLOCK_INFO_ATTEMPTS; ++$attempt){
-            $aState = $this->getRPC()->execCounterpartyd(
+            $aState = $this->getRPC()->exec(
+                'counterpartyd',
                 'get_running_info',
                 array(),
                 $logResult,
@@ -107,6 +118,30 @@ class Counterparty implements ILayer
     }
 
     /**
+     * Returns list of block transactions.
+     *
+     * @param  string $blockHash
+     * @param  bool   $logResult    Flag specifying to log result
+     * @param  bool   $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getBlock($blockHash, $logResult = false, $cacheResult = true)
+    {
+        if(!$this->oRPC){
+            $this->oRPC = new RPC;
+        }
+
+        return
+            $this->oRPC->exec(
+                'bitcoind',
+                'getblock',
+                array($blockHash),
+                $logResult,
+                $cacheResult
+            );
+    }
+
+    /**
      * Returns detailed block information.
      *
      * @param  int  $blockIndex   Block index
@@ -117,9 +152,30 @@ class Counterparty implements ILayer
     public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
-            $this->getRPC()->execCounterpartyd(
+            $this->getRPC()->exec(
+                'counterpartyd',
                 'get_block_info',
                 array('block_index' => $blockIndex),
+                $logResult,
+                $cacheResult
+            );
+    }
+    /**
+     * Returns transaction raw hex with (or without) extended info.
+     *
+     * @param string $txHash     Transaction hash
+     * @param bool $onlyHex      Return only tx raw hex if set to true
+     * @param bool $logResult    Flag specifying to log result
+     * @param bool $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getRawTransaction($txHash, $extended = TRUE, $logResult = FALSE, $cacheResult = TRUE)
+    {
+        return
+            getRPC()->exec(
+                'bitcoind',
+                'getrawtransaction',
+                array($txHash, (int)!!$extended),
                 $logResult,
                 $cacheResult
             );
@@ -136,12 +192,8 @@ class Counterparty implements ILayer
      */
     public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE)
     {
-        $aData = $this->getRPC()->execBitcoind(
-            'getrawtransaction',
-            array($txHash, 1),
-            $logResult,
-            $cacheResult
-        );
+        $aData =
+            $this->getRawTransaction($txHash, TRUE, $logResult, $cacheResult);
         /*
         $aBlock =
             $this->oRPC->execBitcoind(
@@ -152,7 +204,8 @@ class Counterparty implements ILayer
             );
         */
 
-        $aResult = $this->getRPC()->execCounterpartyd(
+        $aResult = $this->getRPC()->exec(
+            'counterpartyd',
             'get_tx_info',
             array(
                 'tx_hex'      => $aData['hex'],
@@ -220,7 +273,8 @@ class Counterparty implements ILayer
     {
         $assets = implode('-', $aAssets);###
         $aResult = array();
-        $aBlocks = $this->getRPC()->execCounterpartyd(
+        $aBlocks = $this->getRPC()->exec(
+            'counterpartyd',
             'get_blocks',
             array('block_indexes' => $aBlockIndexes),
             $logResult,
@@ -355,7 +409,8 @@ class Counterparty implements ILayer
             );
         }
 
-        $aBalances = $this->getRPC()->execCounterpartyd(
+        $aBalances = $this->getRPC()->exec(
+            'counterpartyd',
             'get_balances',
             $aParams + $aExtraParams,
             $logResult,

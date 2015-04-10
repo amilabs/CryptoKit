@@ -2,10 +2,7 @@
 
 namespace AmiLabs\CryptoKit;
 
-use \AmiLabs\CryptoKit\RPC;
-use \AmiLabs\DevKit\Cache;
 use \AmiLabs\DevKit\Registry;
-use \AmiLabs\DevKit\Logger;
 use \AmiLabs\CryptoKit\Blockchain;
 
 /**
@@ -45,7 +42,8 @@ class BlockchainIO{
      *
      * @return \AmiLabs\CryptoKit\BlockchainIO
      */
-    public static function getInstance(){
+    public static function getInstance()
+    {
         if(is_null(self::$oInstance)){
             self::$oInstance = new BlockchainIO();
         }
@@ -58,7 +56,8 @@ class BlockchainIO{
      * @param array $aConfig  Server configuration array
      * @return bool
      */
-    public function checkServerConfig(array $aConfig){
+    public function checkServerConfig(array $aConfig)
+    {
         return
             $this->oLayer->checkServerConfig($aConfig);
     }
@@ -84,18 +83,10 @@ class BlockchainIO{
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getBlock($blockHash, $logResult = false, $cacheResult = true){
-        if(!$this->oRPC){
-            $this->oRPC = new RPC;
-        }
-
+    public function getBlock($blockHash, $logResult = FALSE, $cacheResult = TRUE)
+    {
         return
-            $this->oRPC->execBitcoind(
-                'getblock',
-                array($blockHash),
-                $logResult,
-                $cacheResult
-            );
+            $this->oLayer->getBlock($blockHash, $logResult, $cacheResult);
     }
 
     /**
@@ -106,13 +97,29 @@ class BlockchainIO{
      * @param  bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE){
+    public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE)
+    {
         return
             $this->oLayer->getBlockInfo(
                 $blockIndex,
                 $logResult,
                 $cacheResult
             );
+    }
+
+    /**
+     * Returns transaction raw hex with (or without) extended info.
+     *
+     * @param string $txHash     Transaction hash
+     * @param bool $onlyHex      Return only tx raw hex if set to true
+     * @param bool $logResult    Flag specifying to log result
+     * @param bool $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getRawTransaction($txHash, $extended = TRUE, $logResult = FALSE, $cacheResult = TRUE)
+    {
+        return
+            $this->oLayer->getRawTransaction($txHash, $extended, $logResult, $cacheResult);
     }
 
     /**
@@ -124,7 +131,8 @@ class BlockchainIO{
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @return mixed
      */
-    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE){
+    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE)
+    {
         return
             $this->oLayer->getAssetInfoFromTx($txHash, $logResult, $cacheResult);
     }
@@ -195,9 +203,11 @@ class BlockchainIO{
     /**
      * Contructor.
      */
-    protected function __construct(){
+    protected function __construct()
+    {
         $cfgLayer = Registry::useStorage('CFG')->get('CryptoKit/layer', FALSE);
         if($cfgLayer !== FALSE){
+            // Todo: Ability to use classname in config
             $this->layerName = $cfgLayer;
         }
         $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $this->layerName;

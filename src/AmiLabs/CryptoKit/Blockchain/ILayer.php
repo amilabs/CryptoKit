@@ -17,6 +17,16 @@ interface ILayer
     public function getServerState($ignoreLastBlockInfo = FALSE, $logResult = FALSE);
 
     /**
+     * Returns list of block transactions.
+     *
+     * @param  string $blockHash
+     * @param  bool   $logResult    Flag specifying to log result
+     * @param  bool   $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getBlock($blockHash, $logResult = FALSE, $cacheResult = TRUE);
+
+    /**
      * Returns detailed block information.
      *
      * @param  int  $blockIndex   Block index
@@ -25,6 +35,17 @@ interface ILayer
      * @return mixed
      */
     public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE);
+
+    /**
+     * Returns transaction raw hex with (or without) extended info.
+     *
+     * @param string $txHash     Transaction hash
+     * @param bool $onlyHex      Return only tx raw hex if set to true
+     * @param bool $logResult    Flag specifying to log result
+     * @param bool $cacheResult  Flag specifying to cache result
+     * @return mixed
+     */
+    public function getRawTransaction($txHash, $extended = TRUE, $logResult = FALSE, $cacheResult = TRUE);
 
     /**
      * Returns detailed block information.
