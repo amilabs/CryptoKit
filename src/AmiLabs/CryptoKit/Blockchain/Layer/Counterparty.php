@@ -280,16 +280,18 @@ class Counterparty implements ILayer
             if(empty($aBlock['_messages'])){
                 continue;
             }
+            ### {
             /*
-            $aDecoded = $aBlock['_messages'];###
+            $aDecoded = $aBlock['_messages'];
             foreach($aDecoded as $index => $aDec){
                 if(isset($aDec['bindings'])){
                     $aDecoded[$index]['bindings'] = json_decode($aDec['bindings'], TRUE);
                 }
             }
             file_put_contents("{$assets}.tx.log", print_r($aDecoded, TRUE), FILE_APPEND);###
-            unset($aDecoded);###
+            unset($aDecoded);
             */
+            ### }
             foreach($aBlock['_messages'] as $aBlockMessage){
                 // if(in_array($aBlockMessage['block_index'], array(311579, 323002, 331597))){file_put_contents('block.log', print_r($aBlockMessage, TRUE), FILE_APPEND);}###
                 if(empty($aBlockMessage['bindings'])){
@@ -329,6 +331,29 @@ class Counterparty implements ILayer
                         break; // case 'orders'
 
                     case 'dividends':
+                        ### {
+                        /*
+                        if(
+                            'valid' == $aBindings['status'] ||
+                            in_array($aBindings['dividend_asset'], $aAssets) ||
+                            in_array($aBindings['asset'], $aAssets)
+                        ){
+                            static $ass;
+                            $newAsset = '';
+                            if(!in_array($aBindings['dividend_asset'], $aAssets)){
+                                $newAsset = $aBindings['dividend_asset'];
+                            }elseif(!in_array($aBindings['asset'], $aAssets)){
+                                $newAsset = $aBindings['asset'];
+                            }
+                            if('' !== $newAsset && empty($ass[$newAsset])){
+                                $ass[$newAsset] = TRUE;
+                                echo "DIVIDENDS: New asset found: {$newAsset}\n";
+                                $aBlockMessage['bindings'] = $aBindings;
+                                print_r($aBlockMessage);
+                            }
+                        }
+                        */
+                        ### }
                         if(
                             !isset($aBindings['quantity_per_unit']) ||
                             'valid' != $aBindings['status'] ||
@@ -348,7 +373,7 @@ class Counterparty implements ILayer
                         }
                 }
                 // 64-bit PHP integer hack
-                if($this->is32bit){
+                if(FALSE && $this->is32bit){
                     foreach(
                         array(
                             'quantity',
