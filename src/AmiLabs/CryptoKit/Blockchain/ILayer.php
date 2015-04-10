@@ -40,14 +40,14 @@ interface ILayer
     /**
      * Returns transactions from blocks filtered by passed asset.
      *
-     * @param  string $asset          Asset
+     * @param  array  $aAssets        List of assets
      * @param  array  $aBlockIndexes  List of block indexes
      * @param  bool   $logResult      Flag specifying to log result
      * @param  bool   $cacheResult    Flag specifying to cache result
      * @return array
      */
     public function getAssetTxsFromBlocks(
-        $asset,
+        array $aAssets,
         array $aBlockIndexes,
         $logResult = FALSE,
         $cacheResult = TRUE

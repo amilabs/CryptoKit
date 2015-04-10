@@ -41,7 +41,7 @@ class Counterparty implements ILayer
 
     protected function getRPC(){
         if(is_null($this->oRPC)){
-            $this->oRPC = new RPC;
+        $this->oRPC = new RPC;
         }
         return $this->oRPC;
     }
@@ -205,19 +205,20 @@ class Counterparty implements ILayer
     /**
      * Returns transactions from blocks filtered by passed asset.
      *
-     * @param  string $asset          Asset
+     * @param  array  $aAssets        List of assets
      * @param  array  $aBlockIndexes  List of block indexes
      * @param  bool   $logResult      Flag specifying to log result
      * @param  bool   $cacheResult    Flag specifying to cache result
      * @return array
      */
     public function getAssetTxsFromBlocks(
-        $asset,
+        array $aAssets,
         array $aBlockIndexes,
         $logResult = FALSE,
         $cacheResult = TRUE
     )
     {
+        $assets = implode('-', $aAssets);###
         $aResult = array();
         $aBlocks = $this->getRPC()->execCounterpartyd(
             'get_blocks',
@@ -236,7 +237,7 @@ class Counterparty implements ILayer
                     $aDecoded[$index]['bindings'] = json_decode($aDec['bindings'], TRUE);
                 }
             }
-            file_put_contents("{$asset}.tx.log", print_r($aDecoded, TRUE), FILE_APPEND);###
+            file_put_contents("{$assets}.tx.log", print_r($aDecoded, TRUE), FILE_APPEND);###
             unset($aDecoded);###
             */
             foreach($aBlock['_messages'] as $aBlockMessage){
@@ -256,29 +257,42 @@ class Counterparty implements ILayer
                                 !isset($aBindings['forward_asset']) ||
                                 !isset($aBindings['backward_asset']) ||
                                 (
-                                    $asset != $aBindings['forward_asset'] &&
-                                    $asset != $aBindings['backward_asset']
+                                    !in_array($aBindings['forward_asset'], $aAssets) &&
+                                    !in_array($aBindings['backward_asset'], $aAssets)
                                 )
                             )
                         ){
                             continue 2;
                         }
-                        break;
+                        break; // case 'order_matches'
+
                     case 'orders':
                         if(
                             (
                                 'insert' == $aBlockMessage['command'] &&
                                 isset($aBindings['give_asset']) &&
-                                $asset != $aBindings['give_asset']
+                                !in_array($aBindings['give_asset'], $aAssets)
                             )
                         ){
                             continue 2;
                         }
-                        break;
+                        break; // case 'orders'
+
+                    case 'dividends':
+                        if(
+                            !isset($aBindings['quantity_per_unit']) ||
+                            'valid' != $aBindings['status'] ||
+                            !in_array($aBindings['dividend_asset'], $aAssets)
+                        ){
+                            continue 2;
+                        }
+                        print_r($aBlockMessage);###
+                        break; // case 'dividends'
+
                     default:
                         if(
                             empty($aBindings['asset']) ||
-                            $asset != $aBindings['asset']
+                            !in_array($aBindings['asset'], $aAssets)
                         ){
                             continue 2;
                         }
