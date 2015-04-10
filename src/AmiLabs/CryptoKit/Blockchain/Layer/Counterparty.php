@@ -336,7 +336,7 @@ class Counterparty implements ILayer
                         ){
                             continue 2;
                         }
-                        print_r($aBlockMessage);###
+                        // print_r($aBlockMessage);###
                         break; // case 'dividends'
 
                     default:
