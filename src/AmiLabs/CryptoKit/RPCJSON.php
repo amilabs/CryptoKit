@@ -22,7 +22,8 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
      */
     public function __construct(array $aConfig){
         $oRPCClient = new \Deepelopment\Net\RPC(
-            'AmiLabs\\CryptoKit\\Net\\RPC\\Client\\JSON',
+            // 'AmiLabs\\CryptoKit\\Net\\RPC\\Client\\JSON',
+            'JSON',
             \Deepelopment\Net\RPC::TYPE_CLIENT,
             array(
                 CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
