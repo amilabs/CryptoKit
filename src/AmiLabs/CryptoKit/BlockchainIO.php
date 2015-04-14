@@ -121,6 +121,17 @@ class BlockchainIO{
         return
             $this->oLayer->getRawTransaction($txHash, $extended, $logResult, $cacheResult);
     }
+    /**
+     * Returns newest unconfirmed transactions.
+     *
+     * @param bool $logResult    Flag specifying to log result
+     * @return array
+     */
+    public function getLastTransactions($logResult = FALSE)
+    {
+        return
+            $this->oLayer->getLastTransactions($logResult);
+    }
 
     /**
      * Returns detailed block information.

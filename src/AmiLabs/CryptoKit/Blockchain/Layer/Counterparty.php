@@ -51,6 +51,7 @@ class Counterparty implements ILayer
     {
         if(is_null($this->oRPC)){
             $this->oRPC = new RPC;
+            $this->addCacheValidators();
         }
         return $this->oRPC;
     }
@@ -156,6 +157,7 @@ class Counterparty implements ILayer
                 $cacheResult
             );
     }
+
     /**
      * Returns transaction raw hex with (or without) extended info.
      *
@@ -174,6 +176,25 @@ class Counterparty implements ILayer
                 array($txHash, (int)!!$extended),
                 $logResult,
                 $cacheResult
+            );
+    }
+
+    /**
+     * Returns newest unconfirmed transactions.
+     *
+     * @param bool $logResult    Flag specifying to log result
+     * @param bool $cacheResult  Flag specifying to cache result
+     * @return array
+     */
+    public function getLastTransactions($logResult = FALSE)
+    {
+        return
+            $this->getRPC()->exec(
+                'bitcoind',
+                'getrawmempool',
+                array(),
+                $logResult,
+                FALSE // Never cached
             );
     }
 
@@ -452,7 +473,8 @@ class Counterparty implements ILayer
      * @param bool $logResult      Flag specifying to log result
      * @return mixed
      */
-    public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE){
+    public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE)
+    {
         return
             $this->getRPC()->exec(
                 'counterpartyd',
@@ -466,10 +488,52 @@ class Counterparty implements ILayer
                     "encoding"                  => "multisig",
                     "pubkey"                    => $aPubKeys
                 ),
-                $logResult,
-                FALSE // Sends are always not cached
+                $logResult
             );
     }
+
+    /**
+     * Adds RPC response validators.
+     */
+    protected function addCacheValidators()
+    {
+        // Checks if transaction was mined into the block
+        $this->getRPC()->addCacheRule('bitcoind', 'getrawtransaction', array($this, 'validateGetRawTransactionCache'));
+        // Never cache "send"
+        $this->getRPC()->addCacheRule('counterpartyd', 'send', array($this, 'validateNoCache'));
+    }
+
+    /**
+     * For those methods whose results should never be cached.
+     *
+     * @param mixed $response  Response
+     * @return bool
+     */
+    public function validateNoCache($response)
+    {
+        return FALSE;
+    }
+
+    /**
+     * Checks if bitcoind::getrawtransaction response can be stored in cache.
+     *
+     * @param mixed $response  Bitcoind response
+     * @return bool
+     */
+    public function validateGetRawTransactionCache($response)
+    {
+        $result = FALSE;
+        if(is_array($response) && isset($response['blockhash'])){
+            // Valid extended transaction info
+            $result = TRUE;
+        }
+        if(is_string($response) && strlen($response) && ($response[0] === '0')){
+            // Valid raw trnsaction
+            $result = TRUE;
+        }
+        return $result;
+    }
+
     /**
      * Returns wallets/assets balances from database.
      *

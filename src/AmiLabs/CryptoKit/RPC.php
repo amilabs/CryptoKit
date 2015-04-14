@@ -34,6 +34,12 @@ class RPC {
      */
     private static $aConfig;
     /**
+    * Response cache rules
+    *
+    * @var array
+    */
+    private static $aResponseCacheRules = array();
+    /**
      * Constructor.
      */
     public function __construct($checkServices = true){
@@ -141,13 +147,25 @@ class RPC {
             $oCache = Cache::get($cacheName);
             if($oCache->exists()){
                 $aResult = $oCache->load();
+                if($log){
+                    $oLogger->log('CACHE: Data loaded from cache');
+                }
             }
         }
         if(!isset($aResult)){
             try {
                 $aResult = $this->aServices[$daemon]->exec($command, $aParams, $oLogger);
                 if($cache){
-                    $oCache->save($aResult);
+                    if($this->canCacheResponse($daemon, $command, $aResult)){
+                        $oCache->save($aResult);
+                        if($log){
+                            $oLogger->log('CACHE: Response was stored in cache');
+                        }
+                    }else{
+                        if($log){
+                            $oLogger->log('CACHE: Respones was NOT stored in cache due to cache rules');
+                        }
+                    }
                 }
             }catch(\Exception $e){
                 if($log){
@@ -161,6 +179,41 @@ class RPC {
         }
 
         return $aResult;
+    }
+    /**
+     * Adds cahe rule callback for specified method.
+     *
+     * @param string $daemon
+     * @param string $method
+     * @param callable $callback
+     * @see AmiLabs\CryptoKit\RPC::canCacheResponse
+     */
+    public function addCacheRule($daemon, $method, $callback){
+        if(!isset(self::$aResponseCacheRules[$daemon])){
+            self::$aResponseCacheRules[$daemon] = array();
+        }
+        if(!isset(self::$aResponseCacheRules[$daemon][$method])){
+            self::$aResponseCacheRules[$daemon][$method] = array();
+        }
+        self::$aResponseCacheRules[$daemon][$method][] = $callback;
+    }
+    /**
+     * Checks if a response is valid for specified method.
+     *
+     * @param string $daemon
+     * @param string $method
+     * @param mixed $response  Response to check
+     * @return bool
+     * @see AmiLabs\CryptoKit\RPC::addCacheRule
+     */
+    protected function canCacheResponse($daemon, $method, $response){
+        $result = TRUE;
+        if(isset(self::$aResponseCacheRules[$daemon]) && isset(self::$aResponseCacheRules[$daemon][$method])){
+            foreach(self::$aResponseCacheRules[$daemon][$method] as $callback){
+                $result = $result && call_user_func($callback, $response);
+            }
+        }
+        return $result;
     }
     /**
      * Execute counterpartyd method via counterblockd proxy.

@@ -2,7 +2,7 @@
 
 namespace AmiLabs\CryptoKit;
 
-require PATH_LIB . '/artemko7v/php-op_return/php-OP_RETURN.php';
+require_once PATH_LIB . '/artemko7v/php-op_return/php-OP_RETURN.php';
 
 /**
  * Transaction helper class.
