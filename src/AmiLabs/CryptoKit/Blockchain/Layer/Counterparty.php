@@ -488,7 +488,8 @@ class Counterparty implements ILayer
                     "encoding"                  => "multisig",
                     "pubkey"                    => $aPubKeys
                 ),
-                $logResult
+                $logResult,
+                FALSE
             );
     }
 
@@ -497,21 +498,7 @@ class Counterparty implements ILayer
      */
     protected function addCacheValidators()
     {
-        // Checks if transaction was mined into the block
         $this->getRPC()->addCacheRule('bitcoind', 'getrawtransaction', array($this, 'validateGetRawTransactionCache'));
-        // Never cache "send"
-        $this->getRPC()->addCacheRule('counterpartyd', 'send', array($this, 'validateNoCache'));
-    }
-
-    /**
-     * For those methods whose results should never be cached.
-     *
-     * @param mixed $response  Response
-     * @return bool
-     */
-    public function validateNoCache($response)
-    {
-        return FALSE;
     }
 
     /**

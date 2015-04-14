@@ -17,13 +17,6 @@ class BlockchainIO{
     protected static $oInstance;
 
     /**
-     * RPC execution object
-     *
-     * @var \AmiLabs\CryptoKit\RPC
-     */
-    protected $oRPC;
-
-    /**
      * Layer name
      *
      * @var string
@@ -197,6 +190,23 @@ class BlockchainIO{
     }
 
     /**
+     * Sends specified amount of asset from source to destination.
+     *
+     * @param string $source       Source address
+     * @param string $destination  Destination address
+     * @param string $asset        Asset name
+     * @param int $amount          Amount (in satoshi)
+     * @param array $aPublicKeys   List of public keys of all addresses
+     * @param bool $logResult      Flag specifying to log result
+     * @return mixed
+     */
+    public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE)
+    {
+        return
+            $this->oLayer->send($source, $destination, $asset, $amount, $aPublicKeys, $logResult);
+    }
+
+    /**
      * Returns wallets/assets balances from database.
      *
      * @param  array $aAssets   List of assets
@@ -213,12 +223,13 @@ class BlockchainIO{
 
     /**
      * Contructor.
+     *
+     * @todo Ability to use classname in config
      */
     protected function __construct()
     {
         $cfgLayer = Registry::useStorage('CFG')->get('CryptoKit/layer', FALSE);
         if($cfgLayer !== FALSE){
-            // Todo: Ability to use classname in config
             $this->layerName = $cfgLayer;
         }
         $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $this->layerName;

@@ -48,6 +48,14 @@ interface ILayer
     public function getRawTransaction($txHash, $extended = FALSE, $logResult = FALSE, $cacheResult = TRUE);
 
     /**
+     * Returns newest unconfirmed transactions.
+     *
+     * @param bool $logResult    Flag specifying to log result
+     * @return array
+     */
+    public function getLastTransactions($logResult = FALSE);
+
+    /**
      * Returns detailed block information.
      *
      * @param  string $txHash       Transaction hash
@@ -89,6 +97,19 @@ interface ILayer
         array $aExtraParams = array(),
         $logResult = FALSE
     );
+
+    /**
+     * Sends specified amount of asset from source to destination.
+     *
+     * @param string $source       Source address
+     * @param string $destination  Destination address
+     * @param string $asset        Asset name
+     * @param int $amount          Amount (in satoshi)
+     * @param array $aPublicKeys   List of public keys of all addresses
+     * @param bool $logResult      Flag specifying to log result
+     * @return mixed
+     */
+    public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE);
 
     /**
      * Returns wallets/assets balances from database.
