@@ -4,8 +4,9 @@ namespace AmiLabs\CryptoKit\Blockchain;
 
 interface ILayer
 {
-    const TXN_TYPE_SEND     = 0;
-    const TXN_TYPE_ISSUANCE = 20;
+    const TXN_TYPE_SEND      = 0;
+    const TXN_TYPE_ISSUANCE  = 20;
+    const TXN_TYPE_DIVIDENDS = 50;
 
     /**
      * Returns some operational parameters for the server.

@@ -2,6 +2,8 @@
 
 namespace AmiLabs\CryptoKit\Blockchain\Layer;
 
+use UnexpectedValueException;
+use RuntimeException;
 use AmiLabs\CryptoKit\Blockchain\ILayer;
 use AmiLabs\CryptoKit\RPC;
 use Moontoast\Math\BigNumber;
@@ -112,7 +114,7 @@ class Counterparty implements ILayer
             usleep(self::LAST_BLOCK_INFO_WAIT);
         }
         if(!$ignoreLastBlockInfo && is_null($aState['last_block'])){
-            throw new \RuntimeException('Cannot get last block info');
+            throw new RuntimeException('Cannot get last block info');
         }
 
         return $aState;
@@ -252,6 +254,7 @@ class Counterparty implements ILayer
             $asset = strrev($asset);
         }
 
+        echo $type;
         switch($type){
             case 0:
                 $type = self::TXN_TYPE_SEND;
@@ -259,8 +262,14 @@ class Counterparty implements ILayer
             case 20:
                 $type = self::TXN_TYPE_ISSUANCE;
                 break;
+            /*
+            // Commented because wrong asset name parsed from tx
+            case 50:
+                $type = self::TXN_TYPE_DIVIDENDS;
+                break;
+            */
             default:
-                throw new UnexpectedValueException('Unknown transaction type ' . $type);
+                throw new UnexpectedValueException('Unknown/unsupported transaction type ' . $type);
         }
 
         $quantity =
@@ -268,7 +277,7 @@ class Counterparty implements ILayer
                 BigNumber::convertToBase10($quantity, 16)
             );
 
-        return array('asset' => $asset, 'quantity' => $quantity, 'type' => $type);
+        return array('asset' => $asset, 'quantity' => $quantity->getValue(), 'type' => $type);
     }
 
     /**
