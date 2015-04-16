@@ -182,8 +182,7 @@ class Counterparty implements ILayer
     /**
      * Returns newest unconfirmed transactions.
      *
-     * @param bool $logResult    Flag specifying to log result
-     * @param bool $cacheResult  Flag specifying to cache result
+     * @param bool $logResult  Flag specifying to log result
      * @return array
      */
     public function getLastTransactions($logResult = FALSE)
@@ -486,7 +485,7 @@ class Counterparty implements ILayer
                     "quantity"                  => (int)$amount,
                     "allow_unconfirmed_inputs"  => true,
                     "encoding"                  => "multisig",
-                    "pubkey"                    => $aPubKeys
+                    "pubkey"                    => $aPublicKeys
                 ),
                 $logResult,
                 FALSE

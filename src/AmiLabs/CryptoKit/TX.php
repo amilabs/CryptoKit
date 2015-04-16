@@ -15,7 +15,8 @@ class TX {
      * @param boolean $asHex  Convert decoded value to hex if true
      * @return string
      */
-    public static function getDecodedOpReturn($rawTXN, $asHex = true){
+    public static function getDecodedOpReturn($rawTXN, $asHex = true)
+    {
         $aTXNunpacked = coinspark_unpack_raw_txn($rawTXN);
         $res = '';
         foreach($aTXNunpacked['vout'] as $aOut){
@@ -25,6 +26,7 @@ class TX {
         }
         return ($asHex) ? reset(unpack('H*', $res)) : $res;
     }
+
     /**
      * Adds OP_RETURN output to raw transaction hex.
      *
@@ -41,6 +43,7 @@ class TX {
 		);
 		return coinspark_pack_raw_txn($aTXNunpacked);
 	}
+
     /**
      * Adds custom OP_HASH output. Not recommended to use because it eats memory.
      *
@@ -48,7 +51,8 @@ class TX {
      * @param type $hexString  32 bytes hex string (deadbeefcafe0000000000000000000000000001)
      * @return string
      */
-    public static function addOpHashOutput($rawTXN, $hexString){
+    public static function addOpHashOutput($rawTXN, $hexString)
+    {
         $aTXNunpacked = coinspark_unpack_raw_txn($rawTXN);
         $aTXNunpacked['vout'][]=array(
             'value' => 0.000078,
@@ -56,15 +60,18 @@ class TX {
         );
         return coinspark_pack_raw_txn($aTXNunpacked);
 	}
+
     /**
      * Decodes raw transaction data into array.
      *
      * @param string $rawTXN
      * @return array
      */
-    public static function decodeTransaction($rawTXN){
+    public static function decodeTransaction($rawTXN)
+    {
         return coinspark_unpack_raw_txn($rawTXN);
     }
+
     /**
      * Store data in multisig output.
      *
@@ -72,7 +79,8 @@ class TX {
      * @param type $hexString
      * @return type
      */
-     public static function addMultisigDataOutput($rawTXN, $data){
+    public static function addMultisigDataOutput($rawTXN, $data)
+    {
         $hexString = reset(unpack('H*', $data));
         $dataLength = strlen($hexString);
         if($dataLength <= 196){
@@ -95,4 +103,16 @@ class TX {
         $aTXNunpacked['vout'][]=$last;
         return coinspark_pack_raw_txn($aTXNunpacked);
 	}
+
+    /**
+     * Returns hash of a signed transaction without broadcast.
+     *
+     * @param string $rawHexData  Signed tx raw hex
+     * @return string
+     */
+    public static function calculateTxHash($rawHexData)
+    {
+        $reversedHash = hash('sha256', hash('sha256', pack("H*", trim($rawHexData)), true));
+        return reset(unpack('H*', strrev(pack('H*', $reversedHash))));
+    }
 }
