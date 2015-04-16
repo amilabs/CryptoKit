@@ -254,7 +254,6 @@ class Counterparty implements ILayer
             $asset = strrev($asset);
         }
 
-        echo $type;
         switch($type){
             case 0:
                 $type = self::TXN_TYPE_SEND;
