@@ -202,16 +202,27 @@ class Counterparty implements ILayer
     /**
      * Returns asset related information from transaction.
      *
-     * @param  string $txHash       Transaction hash
+     * @param  string $txHash       Transaction hash or raw data
+     * @param  bool   $hashPassed   Flag specifying that in previous argument passed hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @throws UnexpectedValueException in case of unknown transaction type
      */
-    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE)
+    public function getAssetInfoFromTx(
+        $txHash,
+        $hashPassed = TRUE,
+        $logResult = FALSE,
+        $cacheResult = TRUE
+    )
     {
-        $aData =
-            $this->getRawTransaction($txHash, TRUE, $logResult, $cacheResult);
+        if($hashPassed){
+            $aData =
+                $this->getRawTransaction($txHash, TRUE, $logResult, $cacheResult);
+            $rawData = $aData['hex'];
+        }else{
+            $rawData = $txHash;
+        }
         /*
         $aBlock =
             $this->oRPC->execBitcoind(
@@ -226,7 +237,7 @@ class Counterparty implements ILayer
             'counterpartyd',
             'get_tx_info',
             array(
-                'tx_hex'      => $aData['hex'],
+                'tx_hex'      => $rawData,
                 ### 'block_index' => $aBlock['height']
             ),
             $logResult,

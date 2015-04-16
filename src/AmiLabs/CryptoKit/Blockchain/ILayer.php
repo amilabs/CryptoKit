@@ -60,12 +60,18 @@ interface ILayer
      * Returns detailed block information.
      *
      * @param  string $txHash       Transaction hash
+     * @param  bool   $hashPassed   Flag specifying that in previous argument passed hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @return mixed
      */
-    public function getAssetInfoFromTx($txHash, $logResult = FALSE, $cacheResult = TRUE);
+    public function getAssetInfoFromTx(
+        $txHash,
+        $hashPassed = TRUE,
+        $logResult = FALSE,
+        $cacheResult = TRUE
+    );
 
     /**
      * Returns transactions from blocks filtered by passed asset.
