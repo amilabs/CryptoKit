@@ -14,33 +14,42 @@ class BlockchainIO{
      *
      * @var \AmiLabs\CryptoKit\BlockchainIO
      */
-    protected static $oInstance;
+    // protected static $oInstance;
 
     /**
      * Layer name
      *
      * @var string
      */
-    protected $layerName = 'Counterparty';
+    // protected $layerName = 'Counterparty';
 
     /**
      * Layer driver.
      *
      * @var \AmiLabs\CryptoKit\Blockchain\ILayer
      */
-    protected $oLayer;
+    // public $oLayer;
 
     /**
      * Singleton implementation.
      *
-     * @return \AmiLabs\CryptoKit\BlockchainIO
+     * @ \AmiLabs\CryptoKit\BlockchainIO
+     * @return \AmiLabs\CryptoKit\Blockchain\ILayer
      */
-    public static function getInstance()
+    public static function getInstance($layer = 'Counterparty')
     {
-        if(is_null(self::$oInstance)){
-            self::$oInstance = new BlockchainIO();
-        }
-        return self::$oInstance;
+        return self::initLayer($layer);
+    }
+
+    /**
+     * Returns appropriate block chain layer.
+     *
+     * @param  string $layer
+     * @return \AmiLabs\CryptoKit\Blockchain\ILayer
+     */
+    public static function getLayer($layer = 'Counterparty')
+    {
+        return self::initLayer($layer);
     }
 
     /**
@@ -49,11 +58,13 @@ class BlockchainIO{
      * @param array $aConfig  Server configuration array
      * @return bool
      */
+    /*
     public function checkServerConfig(array $aConfig)
     {
         return
             $this->oLayer->checkServerConfig($aConfig);
     }
+    */
 
     /**
      * Returns some operational parameters for the server.
@@ -62,11 +73,13 @@ class BlockchainIO{
      * @param  bool $logResult            Flag specifying to log result
      * @return array
      */
+    /*
     public function getServerState($ignoreLastBlockInfo = FALSE, $logResult = FALSE)
     {
         return
             $this->oLayer->getServerState($ignoreLastBlockInfo, $logResult);
     }
+    */
 
     /**
      * Returns list of block transactions.
@@ -76,11 +89,13 @@ class BlockchainIO{
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return mixed
      */
+    /*
     public function getBlock($blockHash, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
             $this->oLayer->getBlock($blockHash, $logResult, $cacheResult);
     }
+    */
 
     /**
      * Returns detailed block information.
@@ -90,6 +105,7 @@ class BlockchainIO{
      * @param  bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
+    /*
     public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
@@ -99,6 +115,7 @@ class BlockchainIO{
                 $cacheResult
             );
     }
+    */
 
     /**
      * Returns transaction raw hex with (or without) extended info.
@@ -109,22 +126,27 @@ class BlockchainIO{
      * @param bool $cacheResult  Flag specifying to cache result
      * @return mixed
      */
+    /*
     public function getRawTransaction($txHash, $extended = FALSE, $logResult = FALSE, $cacheResult = TRUE)
     {
         return
             $this->oLayer->getRawTransaction($txHash, $extended, $logResult, $cacheResult);
     }
+    */
+
     /**
      * Returns newest unconfirmed transactions.
      *
      * @param bool $logResult    Flag specifying to log result
      * @return array
      */
+    /*
     public function getLastTransactions($logResult = FALSE)
     {
         return
             $this->oLayer->getLastTransactions($logResult);
     }
+    */
 
     /**
      * Returns detailed block information.
@@ -136,6 +158,7 @@ class BlockchainIO{
      * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
      * @return mixed
      */
+    /*
     public function getAssetInfoFromTx(
         $txHash,
         $hashPassed = TRUE,
@@ -151,6 +174,7 @@ class BlockchainIO{
                 $cacheResult
             );
     }
+    */
 
     /**
      * Returns transactions from blocks filtered by passed asset.
@@ -161,6 +185,7 @@ class BlockchainIO{
      * @param  bool   $cacheResult    Flag specifying to cache result
      * @return array
      */
+    /*
     public function getAssetTxsFromBlocks(
         array $aAssets,
         array $aBlockIndexes,
@@ -175,6 +200,7 @@ class BlockchainIO{
                 $cacheResult
             );
     }
+    */
 
     /**
      * Returns wallets/assets balances.
@@ -185,6 +211,7 @@ class BlockchainIO{
      * @param  bool  $logResult     Flag specifying to log result
      * @return array
      */
+    /*
     public function getBalances(
         array $aAssets = array(),
         array $aWallets = array(),
@@ -199,6 +226,7 @@ class BlockchainIO{
                 $logResult
             );
     }
+    */
 
     /**
      * Sends specified amount of asset from source to destination.
@@ -211,11 +239,13 @@ class BlockchainIO{
      * @param bool $logResult      Flag specifying to log result
      * @return mixed
      */
+    /*
     public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE)
     {
         return
             $this->oLayer->send($source, $destination, $asset, $amount, $aPublicKeys, $logResult);
     }
+    */
 
     /**
      * Returns wallets/assets balances from database.
@@ -237,13 +267,16 @@ class BlockchainIO{
      *
      * @todo Ability to use classname in config
      */
-    protected function __construct()
+    // protected function __construct()
+    public static function initLayer($layer = 'Counterparty')
     {
         $cfgLayer = Registry::useStorage('CFG')->get('CryptoKit/layer', FALSE);
-        if($cfgLayer !== FALSE){
-            $this->layerName = $cfgLayer;
+        if('' !== $layer){
+            $layerName = $layer;
+        }elseif($cfgLayer !== FALSE){
+            $layerName = $cfgLayer;
         }
-        $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $this->layerName;
-        $this->oLayer = new $class;
+        $class = "\\AmiLabs\\CryptoKit\\Blockchain\\Layer\\" . $layerName;
+        return new $class;
     }
 }
