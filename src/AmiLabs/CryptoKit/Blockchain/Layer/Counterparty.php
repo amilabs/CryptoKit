@@ -512,11 +512,32 @@ class Counterparty implements ILayer
     }
 
     /**
-     * Adds RPC response validators.
+     * Signs raw tx.
+     *
+     * @param  string $rawData
+     * @param  string $privateKey
+     * @return string
      */
-    protected function addCacheValidators()
+    public function signRawTx($rawData, $privateKey, $cacheResult = TRUE)
     {
-        $this->getRPC()->addCacheRule('bitcoind', 'getrawtransaction', array($this, 'validateGetRawTransactionCache'));
+        $result =
+            $this->getRPC()->exec(
+                'bitcoind',
+                'signrawtransaction',
+                array(
+                    $rawData,
+                    array(),
+                    array($privateKey)
+                ),
+                FALSE,
+                $cacheResult
+            );
+        if(isset($result['hex'])){
+            $result = $result['hex'];
+        }
+        $result = (string)$result;
+
+        return $result;
     }
 
     /**
@@ -536,7 +557,16 @@ class Counterparty implements ILayer
             // Valid raw trnsaction
             $result = TRUE;
         }
+
         return $result;
+    }
+
+    /**
+     * Adds RPC response validators.
+     */
+    protected function addCacheValidators()
+    {
+        $this->getRPC()->addCacheRule('bitcoind', 'getrawtransaction', array($this, 'validateGetRawTransactionCache'));
     }
 
     /**
