@@ -63,7 +63,13 @@ interface ILayer
      * @param  bool   $hashPassed   Flag specifying that in previous argument passed hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
-     * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
+     * @return array(
+     *     'source'      => 'Source address',
+     *     'destination' => 'Destination address',
+     *     'asset'       => 'Asset',
+     *     'quantity'    => 'Quantity',
+     *     'type'        => ... // Tx type
+     * )
      * @return mixed
      */
     public function getAssetInfoFromTx(

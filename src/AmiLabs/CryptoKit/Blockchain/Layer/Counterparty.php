@@ -206,7 +206,13 @@ class Counterparty implements ILayer
      * @param  bool   $hashPassed   Flag specifying that in previous argument passed hash
      * @param  bool   $logResult    Flag specifying to log result
      * @param  bool   $cacheResult  Flag specifying to cache result
-     * @return array('type' => ..., 'asset' => ..., 'quantity' => ..., 'type' => ...)
+     * @return array(
+     *     'source'      => 'Source address',
+     *     'destination' => 'Destination address',
+     *     'asset'       => 'Asset',
+     *     'quantity'    => 'Quantity',
+     *     'type'        => ... // Tx type
+     * )
      * @throws UnexpectedValueException in case of unknown transaction type
      */
     public function getAssetInfoFromTx(
@@ -287,7 +293,15 @@ class Counterparty implements ILayer
                 BigNumber::convertToBase10($quantity, 16)
             );
 
-        return array('asset' => $asset, 'quantity' => $quantity->getValue(), 'type' => $type);
+        $aResult = array(
+            'source'      => $aResult[0],
+            'destination' => $aResult[1],
+            'asset'       => $asset,
+            'quantity'    => $quantity->getValue(),
+            'type'        => $type
+        );
+
+        return $aResult;
     }
 
     /**
