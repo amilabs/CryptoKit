@@ -72,10 +72,13 @@ class Counterparty implements ILayer
             $oLogger = Logger::get('check-servers');
             $address = $aConfig['counterblockd']['address'];
             $aContextOptions = array(
-                "ssl" => array(
-                    "verify_peer" => FALSE,
-                    "verify_peer_name" => FALSE,
-                )
+                'http' => array(
+                    'timeout' => 5,
+                ),
+                'ssl'  => array(
+                    'verify_peer'      => FALSE,
+                    'verify_peer_name' => FALSE,
+                ),
             );
             $state = @file_get_contents($address, FALSE, stream_context_create($aContextOptions));
             if(!($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)))){
