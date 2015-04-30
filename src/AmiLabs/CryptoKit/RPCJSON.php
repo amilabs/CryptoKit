@@ -12,7 +12,7 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
     /**
      * JSON RPC Client object
      *
-     * @var \JsonRPC\Client
+     * @var \Deepelopment\Net\RPC\Client\JSON
      */
     protected $oClient;
 
@@ -42,6 +42,10 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
      * @return array
      */
     public function exec($command, array $aParams){
-        return $this->oClient->execute($command, $aParams);
+        return $this->oClient->execute(
+            $command,
+            $aParams,
+            array(CURLOPT_CONNECTTIMEOUT => 5)
+        );
     }
 }
