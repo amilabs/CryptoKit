@@ -113,6 +113,7 @@ class TX {
     public static function calculateTxHash($rawHexData)
     {
         $reversedHash = hash('sha256', hash('sha256', pack("H*", trim($rawHexData)), true));
-        return reset(unpack('H*', strrev(pack('H*', $reversedHash))));
+        $unpacked = unpack('H*', strrev(pack('H*', $reversedHash)));
+        return reset($unpacked);
     }
 }
