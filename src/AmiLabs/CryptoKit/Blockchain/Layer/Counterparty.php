@@ -564,7 +564,7 @@ class Counterparty implements ILayer
      * @return string
      */
     public function sendRawTx($rawData, $cacheResult = TRUE, $logResult = FALSE){
-        $result = $oRPC->execBitcoind('sendrawtransaction', array($rawData), $cacheResult, $logResult);
+        $result = $this->getRPC()->execBitcoind('sendrawtransaction', array($rawData), $cacheResult, $logResult);
 
         return $result;
     }

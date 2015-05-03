@@ -14,6 +14,11 @@ use AmiLabs\CryptoKit\TX;
  */
 class Queue{
     /**
+     * @var string
+     */
+    protected $optionsKey;
+
+    /**
      * @var \Deepelopment\Net\RPC\Client\JSON
      */
     protected $oRPC;
@@ -24,8 +29,8 @@ class Queue{
     protected $queuedId;
 
     public function __construct(){
-        $key = str_replace('\\', '/', get_class($this));
-        $this->aConfig = Registry::useStorage('CFG')->get($key, FALSE);
+        $this->aConfig = Registry::useStorage('CFG')->get();
+        $this->optionsKey = str_replace('\\', '/', get_class($this));
     }
 
     /**
@@ -37,7 +42,7 @@ class Queue{
      */
     public function broadcastTx($txData, $privateKey = ''){
         $oBlockChain = BlockchainIO::getLayer();
-        $useQueue = is_array($this->aConfig);
+        $useQueue = is_array($this->aConfig[$this->optionsKey]);
         $result =
             $useQueue
                 ? $this->signTxUsingQueueService($txData, $privateKey)
@@ -73,16 +78,16 @@ class Queue{
         $this->oRPC = RPC::getLayer(
             'JSON',
             RPC::TYPE_CLIENT,
-            Registry::useStorage('CFG')->get()
+            $this->aConfig
         );
-        $this->oRPC->open($this->aConfig['url'] . 'queue.php');
+        $this->oRPC->open($this->aConfig[$this->optionsKey]['queueURL']);
         $aResponse = $this->oRPC->execute(
             'enqueue',
             array(
-                'host_id' => $this->aConfig['hostId'],
-                'app_key' => $this->aConfig['appKey'],
-                'pk_id'   => $this->aConfig['privateKeyId'],
-                'dec_key' => $this->aConfig['decryptionKey'],
+                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
+                'app_key' => $this->aConfig[$this->optionsKey]['appKey'],
+                'pk_id'   => $this->aConfig[$this->optionsKey]['privateKeyId'],
+                'dec_key' => $this->aConfig[$this->optionsKey]['decryptionKey'],
                 'tx_data' => $txData
             )
         );
@@ -100,25 +105,17 @@ class Queue{
         $this->queuedId = $aResponse['id'];
 
         $oRequest = new Request(Registry::useStorage('CFG')->get());
-        $oRequest->send($this->aConfig['url'] . 'signer.php');
+        $oRequest->send($this->aConfig[$this->optionsKey]['signerURL']);
 
         $aResponse = $this->oRPC->execute(
             'get',
             array(
-                'host_id' => $this->aConfig['hostId'],
-                'app_key' => $this->aConfig['appKey']
+                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
+                'app_key' => $this->aConfig[$this->optionsKey]['appKey']
             )
         );
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");
-        }
-        if('OK' !== $aResponse['status']){
-            throw new ErrorException(
-                sprintf(
-                    "Bad response:\n%s",
-                    print_r($aResponse, TRUE)
-                )
-            );
         }
         $found = FALSE;
         foreach($aResponse as $aTx){
@@ -150,8 +147,8 @@ class Queue{
         $aResponse = $this->oRPC->execute(
             'archive',
             array(
-                'host_id' => $this->aConfig['hostId'],
-                'app_key' => $this->aConfig['appKey'],
+                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
+                'app_key' => $this->aConfig[$this->optionsKey]['appKey'],
                 'txs' => array(
                     array(
                         'id'      => $this->queuedId,
@@ -165,7 +162,7 @@ class Queue{
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");
         }
-        if('OK' !== $aResponse['status']){
+        if(1 != $aResponse['qty']){
             throw new ErrorException(
                 sprintf(
                     "Bad response:\n%s",
