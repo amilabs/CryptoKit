@@ -133,6 +133,14 @@ interface ILayer
      */
     public function signRawTx($rawData, $privateKey, $cacheResult = TRUE);
 
+    /**
+     * Sends raw tx.
+     *
+     * @param  string $rawData
+     * @param  string $privateKey
+     * @return string
+     */
+    public function sendRawTx($rawData, $cacheResult = TRUE, $logResult = FALSE);
 
     /**
      * Returns wallets/assets balances from database.

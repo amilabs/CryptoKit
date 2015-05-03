@@ -34,7 +34,7 @@ class Counterparty implements ILayer
      *
      * @var \PDO
      */
-    protected $oDB;
+    // protected $oDB;
 
     /**
      * Constructor.
@@ -553,6 +553,18 @@ class Counterparty implements ILayer
             $result = $result['hex'];
         }
         $result = (string)$result;
+
+        return $result;
+    }
+
+    /**
+     * Sends raw tx.
+     *
+     * @param  string $rawData
+     * @return string
+     */
+    public function sendRawTx($rawData, $cacheResult = TRUE, $logResult = FALSE){
+        $result = $oRPC->execBitcoind('sendrawtransaction', array($rawData), $cacheResult, $logResult);
 
         return $result;
     }
