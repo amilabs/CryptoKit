@@ -11,13 +11,34 @@ use AmiLabs\CryptoKit\TX;
 
 /**
  * Tx signing service queue implementation.
+ *
+ * Direct broadcasting:
+ * <code>
+ * use AmiLabs\CryptoKit\Queue;
+ *
+ * $oQueue = new Queue;
+ * $txHash = $oQueue->broadcastTx($rawTxData, $privateKey);
+ * </code>
+ *
+ * Broadcasting using signing service:
+ * <code>
+ * // Setup next structure in config:
+ * // $aConfig['AmiLabs\\CryptoKit\\Queue'] = array(
+ * //     'queueURL'      => 'https://.../queue.php',
+ * //     'signerURL'     => 'https://.../signer.php',
+ * //     'hostId'        => '...',
+ * //     'appKey'        => '...',
+ * //     'privateKeyId'  => '...',
+ * //     'decryptionKey' => '...'
+ * // );
+ *
+ * use AmiLabs\CryptoKit\Queue;
+ *
+ * $oQueue = new Queue;
+ * $txHash = $oQueue->broadcastTx($rawTxData);
+ * </code>
  */
 class Queue{
-    /**
-     * @var string
-     */
-    protected $optionsKey;
-
     /**
      * @var \Deepelopment\Net\RPC\Client\JSON
      */
@@ -29,8 +50,7 @@ class Queue{
     protected $queuedId;
 
     public function __construct(){
-        $this->aConfig = Registry::useStorage('CFG')->get();
-        $this->optionsKey = str_replace('\\', '/', get_class($this));
+        $this->aConfig = Registry::useStorage('CFG')->get(get_class($this), FALSE);
     }
 
     /**
@@ -42,7 +62,7 @@ class Queue{
      */
     public function broadcastTx($txData, $privateKey = ''){
         $oBlockChain = BlockchainIO::getLayer();
-        $useQueue = is_array($this->aConfig[$this->optionsKey]);
+        $useQueue = is_array($this->aConfig);
         $result =
             $useQueue
                 ? $this->signTxUsingQueueService($txData, $privateKey)
@@ -78,16 +98,16 @@ class Queue{
         $this->oRPC = RPC::getLayer(
             'JSON',
             RPC::TYPE_CLIENT,
-            $this->aConfig
+            Registry::useStorage('CFG')->get()
         );
-        $this->oRPC->open($this->aConfig[$this->optionsKey]['queueURL']);
+        $this->oRPC->open($this->aConfig['queueURL']);
         $aResponse = $this->oRPC->execute(
             'enqueue',
             array(
-                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
-                'app_key' => $this->aConfig[$this->optionsKey]['appKey'],
-                'pk_id'   => $this->aConfig[$this->optionsKey]['privateKeyId'],
-                'dec_key' => $this->aConfig[$this->optionsKey]['decryptionKey'],
+                'host_id' => $this->aConfig['hostId'],
+                'app_key' => $this->aConfig['appKey'],
+                'pk_id'   => $this->aConfig['privateKeyId'],
+                'dec_key' => $this->aConfig['decryptionKey'],
                 'tx_data' => $txData
             )
         );
@@ -105,13 +125,13 @@ class Queue{
         $this->queuedId = $aResponse['id'];
 
         $oRequest = new Request(Registry::useStorage('CFG')->get());
-        $oRequest->send($this->aConfig[$this->optionsKey]['signerURL']);
+        $oRequest->send($this->aConfig['signerURL']);
 
         $aResponse = $this->oRPC->execute(
             'get',
             array(
-                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
-                'app_key' => $this->aConfig[$this->optionsKey]['appKey']
+                'host_id' => $this->aConfig['hostId'],
+                'app_key' => $this->aConfig['appKey']
             )
         );
         if(!is_array($aResponse)){
@@ -147,8 +167,8 @@ class Queue{
         $aResponse = $this->oRPC->execute(
             'archive',
             array(
-                'host_id' => $this->aConfig[$this->optionsKey]['hostId'],
-                'app_key' => $this->aConfig[$this->optionsKey]['appKey'],
+                'host_id' => $this->aConfig['hostId'],
+                'app_key' => $this->aConfig['appKey'],
                 'txs' => array(
                     array(
                         'id'      => $this->queuedId,
