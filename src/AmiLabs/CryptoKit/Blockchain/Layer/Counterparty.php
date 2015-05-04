@@ -2,8 +2,9 @@
 
 namespace AmiLabs\CryptoKit\Blockchain\Layer;
 
-use UnexpectedValueException;
+use Exception;
 use RuntimeException;
+use UnexpectedValueException;
 use AmiLabs\CryptoKit\Blockchain\ILayer;
 use AmiLabs\CryptoKit\RPC;
 use Moontoast\Math\BigNumber;
@@ -217,6 +218,7 @@ class Counterparty implements ILayer
      *     'type'        => ... // Tx type
      * )
      * @throws UnexpectedValueException in case of unknown transaction type
+     * @todo   Count correct quantity for BTC txs
      */
     public function getAssetInfoFromTx(
         $txHash,
@@ -232,26 +234,55 @@ class Counterparty implements ILayer
         }else{
             $rawData = $txHash;
         }
-        /*
-        $aBlock =
-            $this->oRPC->execBitcoind(
-                'getblock',
-                array($aData['blockhash']),
+
+        try{
+            $aResult = $this->getRPC()->exec(
+                'counterpartyd',
+                'get_tx_info',
+                array(
+                    'tx_hex'      => $rawData,
+                    ### 'block_index' => $aBlock['height']
+                ),
                 $logResult,
                 $cacheResult
             );
-        */
+        }catch(Exception $oException){
+            if(
+                -1 == $oException->getCode() &&
+                FALSE !== strpos($oException->getMessage(), 'HTTP code: 500')
+            ){
+                // Not counterparty tx
+                $aDecodedTx = $this->decodeRawTx($rawData);
+                $source = '';
+                $destination = '';
+                $quantity = 0;
+                foreach($aDecodedTx['vout'] as $aVOut){
+                    if(
+                        isset($aVOut['scriptPubKey']['type']) &&
+                        isset($aVOut['scriptPubKey']['addresses']) &&
+                        'pubkeyhash' == $aVOut['scriptPubKey']['type'] &&
+                        isset($aVOut['scriptPubKey']['addresses'])
+                    ){
+                        if('' == $destination){
+                            $destination = $aVOut['scriptPubKey']['addresses'][0];
+                        }else{
+                            $source = $aVOut['scriptPubKey']['addresses'][0];
+                        }
+                    }
+                    // $quantity += $aVOut['value'];
+                }
+                $aResult = array(
+                    'source'      => $source,
+                    'destination' => $destination,
+                    'asset'       => '-',
+                    'quantity'    => $quantity,
+                    'type'        => self::TXN_TYPE_SEND
+                );
 
-        $aResult = $this->getRPC()->exec(
-            'counterpartyd',
-            'get_tx_info',
-            array(
-                'tx_hex'      => $rawData,
-                ### 'block_index' => $aBlock['height']
-            ),
-            $logResult,
-            $cacheResult
-        );
+                return $aResult;
+            }
+            throw $oException;
+        }
         $data = $aResult[4];
         $type = hexdec(mb_substr($data, 0, 8));
         $assetName = mb_substr($data, 8, 16);
@@ -323,7 +354,7 @@ class Counterparty implements ILayer
         $cacheResult = TRUE
     )
     {
-        $assets = implode('-', $aAssets);###
+        // $assets = implode('-', $aAssets);###
         $aResult = array();
         $aBlocks = $this->getRPC()->exec(
             'counterpartyd',
@@ -500,12 +531,12 @@ class Counterparty implements ILayer
     /**
      * Sends specified amount of asset from source to destination.
      *
-     * @param string $source       Source address
-     * @param string $destination  Destination address
-     * @param string $asset        Asset name
-     * @param int $amount          Amount (in satoshi)
-     * @param array $aPublicKeys   List of public keys of all addresses
-     * @param bool $logResult      Flag specifying to log result
+     * @param  string $source       Source address
+     * @param  string $destination  Destination address
+     * @param  string $asset        Asset name
+     * @param  int    $amount       Amount (in satoshi)
+     * @param  array  $aPublicKeys  List of public keys of all addresses
+     * @param  bool   $logResult    Flag specifying to log result
      * @return mixed
      */
     public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE)
@@ -533,9 +564,10 @@ class Counterparty implements ILayer
      *
      * @param  string $rawData
      * @param  string $privateKey
+     * @param  bool   $logResult    Flag specifying to log result
      * @return string
      */
-    public function signRawTx($rawData, $privateKey, $cacheResult = TRUE)
+    public function signRawTx($rawData, $privateKey, $logResult = FALSE)
     {
         $result =
             $this->getRPC()->exec(
@@ -546,8 +578,8 @@ class Counterparty implements ILayer
                     array(),
                     array($privateKey)
                 ),
-                FALSE,
-                $cacheResult
+                $logResult,
+                FALSE
             );
         if(isset($result['hex'])){
             $result = $result['hex'];
@@ -561,10 +593,36 @@ class Counterparty implements ILayer
      * Sends raw tx.
      *
      * @param  string $rawData
+     * @param  bool   $logResult  Flag specifying to log result
      * @return string
      */
-    public function sendRawTx($rawData, $cacheResult = TRUE, $logResult = FALSE){
-        $result = $this->getRPC()->execBitcoind('sendrawtransaction', array($rawData), $cacheResult, $logResult);
+    public function sendRawTx($rawData, $logResult = FALSE){
+        $result = $this->getRPC()->execBitcoind(
+            'sendrawtransaction',
+            array($rawData),
+            FALSE,
+            $logResult
+        );
+
+        return $result;
+    }
+
+    /**
+     * Decodes raw tx.
+     *
+     * @param  string $rawData
+     * @param  bool   $logResult    Flag specifying to log result
+     * @param  bool   $cacheResult  Flag specifying to cache result
+     * @return array
+     */
+    public function decodeRawTx($rawData, $logResult = FALSE, $cacheResult = TRUE)
+    {
+        $result = $this->getRPC()->execBitcoind(
+            'decoderawtransaction',
+            array($rawData),
+            $logResult,
+            $cacheResult
+        );
 
         return $result;
     }

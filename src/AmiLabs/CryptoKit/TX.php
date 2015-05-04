@@ -24,7 +24,9 @@ class TX {
                 $res = pack('H*', substr($aOut['scriptPubKey'], 4));
             }
         }
-        return ($asHex) ? reset(unpack('H*', $res)) : $res;
+        $result = unpack('H*', $res);
+
+        return $asHex ? reset($result) : $res;
     }
 
     /**

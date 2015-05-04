@@ -114,12 +114,12 @@ interface ILayer
     /**
      * Sends specified amount of asset from source to destination.
      *
-     * @param string $source       Source address
-     * @param string $destination  Destination address
-     * @param string $asset        Asset name
-     * @param int    $amount       Amount (in satoshi)
-     * @param array  $aPublicKeys  List of public keys of all addresses
-     * @param bool   $logResult    Flag specifying to log result
+     * @param  string $source       Source address
+     * @param  string $destination  Destination address
+     * @param  string $asset        Asset name
+     * @param  int    $amount       Amount (in satoshi)
+     * @param  array  $aPublicKeys  List of public keys of all addresses
+     * @param  bool   $logResult    Flag specifying to log result
      * @return mixed
      */
     public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE);
@@ -129,18 +129,29 @@ interface ILayer
      *
      * @param  string $rawData
      * @param  string $privateKey
+     * @param  bool   $logResult    Flag specifying to log result
      * @return string
      */
-    public function signRawTx($rawData, $privateKey, $cacheResult = TRUE);
+    public function signRawTx($rawData, $privateKey, $logResult = FALSE);
 
     /**
      * Sends raw tx.
      *
      * @param  string $rawData
-     * @param  string $privateKey
+     * @param  bool   $logResult  Flag specifying to log result
      * @return string
      */
-    public function sendRawTx($rawData, $cacheResult = TRUE, $logResult = FALSE);
+    public function sendRawTx($rawData, $logResult = FALSE);
+
+    /**
+     * Decodes raw tx.
+     *
+     * @param  string $rawData
+     * @param  bool   $logResult    Flag specifying to log result
+     * @param  bool   $cacheResult  Flag specifying to cache result
+     * @return array
+     */
+    public function decodeRawTx($rawData, $logResult = FALSE, $cacheResult = TRUE);
 
     /**
      * Returns wallets/assets balances from database.
