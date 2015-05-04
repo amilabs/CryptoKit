@@ -68,14 +68,14 @@ class Queue{
                 ? $this->signTxUsingQueueService($txData, $privateKey)
                 : $oBlockChain->signRawTx($txData, $privateKey);
         try{
-            $signedTx = $oBlockChain->sendRawTx($result);
+            $oBlockChain->sendRawTx($result);
         }catch(Exception $oException){
             if($useQueue){
                 $this->archiveTx('F', $oException->getMessage());
             }
             throw $oException;
         }
-        $txHash = TX::calculateTxHash($signedTx);
+        $txHash = TX::calculateTxHash($result);
         if($useQueue){
             $this->archiveTx('S', 'Broadcasted successfully', $txHash);
         }
