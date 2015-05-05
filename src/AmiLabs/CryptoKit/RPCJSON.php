@@ -2,6 +2,7 @@
 
 namespace AmiLabs\CryptoKit;
 
+use \AmiLabs\DevKit\Registry;
 use \AmiLabs\CryptoKit\IRPCServiceClient;
 use \AmiLabs\CryptoKit\RPCServiceClient;
 
@@ -28,7 +29,9 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
             \Deepelopment\Net\RPC::TYPE_CLIENT,
             array(
                 CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
-                CURLOPT_SSL_VERIFYHOST => FALSE
+                CURLOPT_SSL_VERIFYHOST => FALSE,
+                'logger'               =>
+                    Registry::useStorage('CFG')->get('logger', array())
             )
         );
         $this->oClient->open($aConfig['address']);
