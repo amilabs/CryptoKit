@@ -145,6 +145,6 @@ class TX {
      */
     public static function satoshiToFloat($value)
     {
-        return intval($value) / self::SATOSHI;
+        return $value / self::SATOSHI;
     }    
 }
