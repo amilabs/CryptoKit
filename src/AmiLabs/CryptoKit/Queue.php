@@ -12,31 +12,50 @@ use AmiLabs\CryptoKit\TX;
 /**
  * Tx signing service queue implementation.
  *
- * Direct broadcasting:
+ * <ul>
+ *     <li>Direct broadcasting:
  * <code>
  * use AmiLabs\CryptoKit\Queue;
  *
  * $oQueue = new Queue;
- * $txHash = $oQueue->broadcastTx($rawTxData, $privateKey);
+ * try{
+ *     $txHash = $oQueue->broadcastTx($rawTxData, $privateKey);
+ * }catch(Exception $oException){
+ *     // ...
+ * }
  * </code>
- *
- * Broadcasting using signing service:
+ *     </li>
+ *     <li>Broadcasting using signing service:
+ *     <ul>
+ *         <li>Setup next structure in config:
  * <code>
- * // Setup next structure in config:
- * // $aConfig['AmiLabs\\CryptoKit\\Queue'] = array(
- * //     'queueURL'      => 'https://.../queue.php',
- * //     'signerURL'     => 'https://.../signer.php',
- * //     'hostId'        => '...',
- * //     'appKey'        => '...',
- * //     'privateKeyId'  => '...',
- * //     'decryptionKey' => '...'
- * // );
- *
+ * $aConfig['AmiLabs\\CryptoKit\\Queue'] = array(
+ *     'queueURL'                      => 'https://.../queue.php',
+ *     'signerURL'                     => 'https://.../signer.php',
+ *     'hostId'                        => '...',
+ *     'appKey'                        => '...',
+ *     'privateKeyId'                  => '...',
+ *     'decryptionKey'                 => '...',
+ *     // Not critical for broadcasting to set flag to FALSE
+ *     'throwImpossibilityToArchiveTx' => TRUE
+ * );
+ * </code>
+ *         </li>
+ *         <li>Code:
+ * <code>
  * use AmiLabs\CryptoKit\Queue;
  *
  * $oQueue = new Queue;
- * $txHash = $oQueue->broadcastTx($rawTxData);
+ * try{
+ *     $txHash = $oQueue->broadcastTx($rawTxData);
+ * }catch(Exception $oException){
+ *     // ...
+ * }
  * </code>
+ *         </li>
+ *     </ul>
+ *     </li>
+ * </ul>
  */
 class Queue{
     /**
@@ -71,13 +90,25 @@ class Queue{
             $oBlockChain->sendRawTx($result);
         }catch(Exception $oException){
             if($useQueue){
-                $this->archiveTx('F', $oException->getMessage());
+                try{
+                    $this->archiveTx('F', $oException->getMessage());
+                }catch(Exception $oException){
+                    if($this->aConfig['throwImpossibilityToArchiveTx']){
+                        throw $oException;
+                    }
+                }
             }
             throw $oException;
         }
         $txHash = TX::calculateTxHash($result);
         if($useQueue){
-            $this->archiveTx('S', 'Broadcasted successfully', $txHash);
+            try{
+                $this->archiveTx('S', 'Broadcasted successfully', $txHash);
+            }catch(Exception $oException){
+                if($this->aConfig['throwImpossibilityToArchiveTx']){
+                    throw $oException;
+                }
+            }
         }
 
         return $txHash;
