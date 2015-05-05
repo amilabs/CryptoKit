@@ -130,16 +130,14 @@ class RPC {
         if(!in_array($daemon, array_keys($this->aServices))){
             throw new \Exception("Unknown daemon: " . $daemon, -1);
         }
-        $oLogger = null;
-        if($log){
-            /* @var $oLogger \AmiLabs\Logger */
-            $oLogger = Logger::get('rpc-' . $daemon);
-            $oLogger->log(Logger::DELIMITER);
-            $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
-            $oLogger->log('Execute command: ' . $command);
-            $oLogger->log('Params: ' . var_export($aParams, true));
 
-        }
+        /* @var $oLogger \AmiLabs\Logger */
+        $oLogger = Logger::get('rpc-' . $daemon, FALSE, $log);
+        $oLogger->log(Logger::DELIMITER);
+        $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
+        $oLogger->log('Execute command: ' . $command);
+        $oLogger->log('Params: ' . var_export($aParams, true));
+
         $cacheName = $daemon . '_' . $command . '_' . md5(serialize($aParams));
 
         /* @var $oCache \AmiLabs\DevKit\FileCache */
@@ -147,9 +145,7 @@ class RPC {
             $oCache = Cache::get($cacheName);
             if($oCache->exists()){
                 $aResult = $oCache->load();
-                if($log){
-                    $oLogger->log('CACHE: Data loaded from cache');
-                }
+                $oLogger->log('CACHE: Data loaded from cache');
             }
         }
         if(!isset($aResult)){
@@ -158,25 +154,17 @@ class RPC {
                 if($cache){
                     if(!is_null($aResult) && $this->canCacheResponse($daemon, $command, $aResult)){
                         $oCache->save($aResult);
-                        if($log){
-                            $oLogger->log('CACHE: Response was stored in cache');
-                        }
+                        $oLogger->log('CACHE: Response was stored in cache');
                     }else{
-                        if($log){
-                            $oLogger->log('CACHE: Respones was NOT stored in cache due to cache rules');
-                        }
+                        $oLogger->log('CACHE: Response was NOT stored in cache due to cache rules or NULL value');
                     }
                 }
             }catch(\Exception $e){
-                if($log){
-                    $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
-                }
+                $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
                 throw new \Exception($e->getMessage(), -1, $e);
             }
         }
-        if($log){
-            $oLogger->log('Result: ' . var_export($aResult, true));
-        }
+        $oLogger->log('Result: ' . var_export($aResult, true));
 
         return $aResult;
     }
