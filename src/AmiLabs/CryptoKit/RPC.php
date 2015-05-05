@@ -156,7 +156,7 @@ class RPC {
             try {
                 $aResult = $this->aServices[$daemon]->exec($command, $aParams, $oLogger);
                 if($cache){
-                    if($this->canCacheResponse($daemon, $command, $aResult)){
+                    if(!is_null($aResult) && $this->canCacheResponse($daemon, $command, $aResult)){
                         $oCache->save($aResult);
                         if($log){
                             $oLogger->log('CACHE: Response was stored in cache');
