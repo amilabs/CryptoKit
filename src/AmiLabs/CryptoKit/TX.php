@@ -6,8 +6,15 @@ require_once PATH_LIB . '/artemko7v/php-op_return/php-OP_RETURN.php';
 
 /**
  * Transaction helper class.
+ * 
+ * @todo: move to BlockchainLayer subclass, like BlockchainIO::...->getTXHelper();
  */
 class TX {
+    /**
+     * Satoshi divider
+     */
+    const SATOSHI = 100000000;
+
     /**
      * Decodes OP_RETURN output from raw transaction hex.
      *
@@ -118,4 +125,26 @@ class TX {
         $unpacked = unpack('H*', strrev(pack('H*', $reversedHash)));
         return reset($unpacked);
     }
+
+    /**
+     * Converts float value into Satoshis
+     * 
+     * @param float $value  Value to convert to Satoshis
+     * @return int
+     */
+    public static function floatToSatoshi($value)
+    {
+        return round(floatval($value) * self::SATOSHI);
+    }
+
+    /**
+     * Converts Satoshis value into float value
+     * 
+     * @param int $value  Value in Satoshi to convert
+     * @return float
+     */
+    public static function satoshiToFloat($value)
+    {
+        return intval($value) / self::SATOSHI;
+    }    
 }
