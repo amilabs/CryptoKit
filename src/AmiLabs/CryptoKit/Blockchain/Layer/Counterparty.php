@@ -529,7 +529,8 @@ class Counterparty implements ILayer
     }
 
     /**
-     * Sends specified amount of asset from source to destination.
+     * Creates specified tx sending amount of asset from source
+     * to destination and returns raw tx data.
      *
      * @param  string $source       Source address
      * @param  string $destination  Destination address
@@ -537,7 +538,7 @@ class Counterparty implements ILayer
      * @param  int    $amount       Amount (in satoshi)
      * @param  array  $aPublicKeys  List of public keys of all addresses
      * @param  bool   $logResult    Flag specifying to log result
-     * @return mixed
+     * @return string
      */
     public function send($source, $destination, $asset, $amount, array $aPublicKeys = array(), $logResult = TRUE)
     {
