@@ -46,23 +46,9 @@ class Counterparty implements ILayer
     }
 
     /**
-     * Creates new RPC object, or uses existing one.
-     *
-     * @return \AmiLabs\CryptoKit\RPC
-     */
-    protected function getRPC()
-    {
-        if(is_null($this->oRPC)){
-            $this->oRPC = new RPC;
-            $this->addCacheValidators();
-        }
-        return $this->oRPC;
-    }
-
-    /**
      * Checks if Counterparty server is up and running.
      *
-     * @param array $aConfig  Server configuration
+     * @param  array $aConfig  Server configuration
      * @return bool
      */
     public function checkServerConfig(array $aConfig)
@@ -118,7 +104,7 @@ class Counterparty implements ILayer
             usleep(self::LAST_BLOCK_INFO_WAIT);
         }
         if(!$ignoreLastBlockInfo && is_null($aState['last_block'])){
-            throw new RuntimeException('Cannot get last block info');
+            throw new RuntimeException('Blockchain: cannot get last block info');
         }
 
         return $aState;
@@ -567,6 +553,7 @@ class Counterparty implements ILayer
      * @param  string $privateKey
      * @param  bool   $logResult    Flag specifying to log result
      * @return string
+     * @todo   Cover by unit tests
      */
     public function signRawTx($rawData, $privateKey, $logResult = FALSE)
     {
@@ -596,6 +583,7 @@ class Counterparty implements ILayer
      * @param  string $rawData
      * @param  bool   $logResult  Flag specifying to log result
      * @return string
+     * @todo   Cover by unit tests
      */
     public function sendRawTx($rawData, $logResult = FALSE){
         $result = $this->getRPC()->execBitcoind(
@@ -633,20 +621,35 @@ class Counterparty implements ILayer
      *
      * @param mixed $response  Bitcoind response
      * @return bool
+     * @todo   Cover by unit tests
      */
     public function validateGetRawTransactionCache($response)
     {
         $result = FALSE;
         if(is_array($response) && isset($response['blockhash'])){
-            // Valid extended transaction info
+            // Valid extended tx info
             $result = TRUE;
         }
         if(is_string($response) && strlen($response) && ($response[0] === '0')){
-            // Valid raw trnsaction
+            // Valid raw tx
             $result = TRUE;
         }
 
         return $result;
+    }
+
+    /**
+     * Creates new RPC object, or uses existing one.
+     *
+     * @return \AmiLabs\CryptoKit\RPC
+     */
+    protected function getRPC()
+    {
+        if(is_null($this->oRPC)){
+            $this->oRPC = new RPC;
+            $this->addCacheValidators();
+        }
+        return $this->oRPC;
     }
 
     /**

@@ -9,6 +9,14 @@ interface ILayer
     const TXN_TYPE_DIVIDENDS = 50;
 
     /**
+     * Checks if server is up and running.
+     *
+     * @param  array $aConfig  Server configuration
+     * @return bool
+     */
+    public function checkServerConfig(array $aConfig);
+
+    /**
      * Returns some operational parameters for the server.
      *
      * @param  bool $ignoreLastBlockInfo  Flag specifying to ignore last block info if not available
