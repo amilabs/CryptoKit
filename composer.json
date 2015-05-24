@@ -14,8 +14,8 @@
     "require": {
         "php": ">=5.3.1",
         "artemko7v/php-op_return": "dev-master",
+        "Deepelopment/Core": "dev-develop",
         "Deepelopment/Net": "dev-develop",
-        "deepeloper/Deepelopment": "dev-develop",
         "moontoast/math": "*"
     },
     "autoload": {
