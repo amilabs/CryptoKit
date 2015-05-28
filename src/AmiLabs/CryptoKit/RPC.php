@@ -65,11 +65,12 @@ class RPC {
      * @param mixed $checkServices
      */
     protected function loadConfiguration($checkServices){
+        $marker = Registry::useStorage('CFG')->get('CryptoKit/RPC/marker', FALSE);
         $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
 
         if(is_array($aConfigs)){
             $needToSearchConfig = true;
-            $oCache = Cache::get('rpc-service');
+            $oCache = Cache::get('rpc-service' . (FALSE === $marker ? '' : '-' . $marker));
             if($oCache->exists() && !$oCache->clearIfOlderThan(self::CHECK_INTERVAL)){
                 $aConfig = $oCache->load();
                 if($checkServices){
