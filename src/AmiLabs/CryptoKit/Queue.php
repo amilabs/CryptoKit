@@ -73,11 +73,11 @@ class Queue{
     public function __construct($privateKeyId = FALSE, $decryptionKey = FALSE, $hostId = FALSE, $appKey = FALSE, $throwImpossibilityToArchiveTx = TRUE){
         if($privateKeyId){
             $this->aConfig = array(
-                'host_id'  => $hostId,
-                'app_key'  => $appKey,
-                'pk_id'    => $privateKeyId,
-                'dec_key'  => $decryptionKey,
-                'throw_ex' => $throwImpossibilityToArchiveTx
+                'hostId'  => $hostId,
+                'appKey'  => $appKey,
+                'privateKeyId'    => $privateKeyId,
+                'decryptionKey'  => $decryptionKey,
+                'throwExceptions' => $throwImpossibilityToArchiveTx
             );
         }
         /**
@@ -107,7 +107,7 @@ class Queue{
                 try{
                     $this->archiveTx('F', $oException->getMessage());
                 }catch(Exception $oException){
-                    if($this->aConfig['throw_ex']){
+                    if($this->aConfig['throwExceptions']){
                         throw $oException;
                     }
                 }
@@ -119,7 +119,7 @@ class Queue{
             try{
                 $this->archiveTx('S', 'Broadcasted successfully', $txHash);
             }catch(Exception $oException){
-                if($this->aConfig['throw_ex']){
+                if($this->aConfig['throwExceptions']){
                     throw $oException;
                 }
             }
