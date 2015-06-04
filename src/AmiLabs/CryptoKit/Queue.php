@@ -83,7 +83,7 @@ class Queue{
         /**
          * @var \AmiLabs\CryptoKit\RPC
          */
-        $this->oRPC = RPC();
+        $this->oRPC = new RPC();
     }
 
     /**
