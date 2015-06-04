@@ -4,9 +4,8 @@ namespace AmiLabs\CryptoKit;
 
 use Exception;
 use ErrorException;
-use Deepelopment\Net\Request;
-use Deepelopment\Net\RPC;
 use AmiLabs\DevKit\Registry;
+use AmiLabs\CryptoKit\RPC;
 use AmiLabs\CryptoKit\TX;
 
 /**
@@ -26,26 +25,10 @@ use AmiLabs\CryptoKit\TX;
  * </code>
  *     </li>
  *     <li>Broadcasting using signing service:
- *     <ul>
- *         <li>Setup next structure in config:
- * <code>
- * $aConfig['AmiLabs\\CryptoKit\\Queue'] = array(
- *     'queueURL'                      => 'https://.../queue.php',
- *     'signerURL'                     => 'https://.../signer.php',
- *     'hostId'                        => '...',
- *     'appKey'                        => '...',
- *     'privateKeyId'                  => '...',
- *     'decryptionKey'                 => '...',
- *     // Not critical for broadcasting to set flag to FALSE
- *     'throwImpossibilityToArchiveTx' => TRUE
- * );
- * </code>
- *         </li>
- *         <li>Code:
  * <code>
  * use AmiLabs\CryptoKit\Queue;
  *
- * $oQueue = new Queue;
+ * $oQueue = new Queue($privateKeyId, $decryptionKey, [$hostId], [$appKey]);
  * try{
  *     $txHash = $oQueue->broadcastTx($rawTxData);
  * }catch(Exception $oException){
@@ -59,7 +42,15 @@ use AmiLabs\CryptoKit\TX;
  */
 class Queue{
     /**
-     * @var \Deepelopment\Net\RPC\Client\JSON
+     * Queue configuration
+     *
+     * @var mixed
+     */
+    protected $aConfig = FALSE;
+    /**
+     * RPC Engine
+     *
+     * @var \AmiLabs\CryptoKit\RPC
      */
     protected $oRPC;
 
@@ -68,8 +59,31 @@ class Queue{
      */
     protected $queuedId;
 
-    public function __construct(){
-        $this->aConfig = Registry::useStorage('CFG')->get(get_class($this), FALSE);
+    /**
+     * Constructor.
+     *
+     * @param string $privateKeyId                   Private Key ID
+     * @param string $decryptionKey                  Decryption Key for provided PK ID
+     * @param string $hostId                         HOST ID
+     * @param string $appKey                         Application Key
+     * @param bool   $throwImpossibilityToArchiveTx  Throw exception on failure
+     * @todo Throw an exception if obligatory parameters are missing
+     * @todo Change name of config params
+     */
+    public function __construct($privateKeyId = FALSE, $decryptionKey = FALSE, $hostId = FALSE, $appKey = FALSE, $throwImpossibilityToArchiveTx = TRUE){
+        if($privateKeyId){
+            $this->aConfig = array(
+                'host_id'  => $hostId,
+                'app_key'  => $appKey,
+                'pk_id'    => $privateKeyId,
+                'dec_key'  => $decryptionKey,
+                'throw_ex' => $throwImpossibilityToArchiveTx
+            );
+        }
+        /**
+         * @var \AmiLabs\CryptoKit\RPC
+         */
+        $this->oRPC = RPC();
     }
 
     /**
@@ -93,7 +107,7 @@ class Queue{
                 try{
                     $this->archiveTx('F', $oException->getMessage());
                 }catch(Exception $oException){
-                    if($this->aConfig['throwImpossibilityToArchiveTx']){
+                    if($this->aConfig['throw_ex']){
                         throw $oException;
                     }
                 }
@@ -105,7 +119,7 @@ class Queue{
             try{
                 $this->archiveTx('S', 'Broadcasted successfully', $txHash);
             }catch(Exception $oException){
-                if($this->aConfig['throwImpossibilityToArchiveTx']){
+                if($this->aConfig['throw_ex']){
                     throw $oException;
                 }
             }
@@ -123,25 +137,19 @@ class Queue{
      * @throws ErrorException
      */
     protected function signTxUsingQueueService($txData){
-        /**
-         * @var \Deepelopment\Net\RPC\Client\JSON
-         */
-        $this->oRPC = RPC::getLayer(
-            'JSON',
-            RPC::TYPE_CLIENT,
-            Registry::useStorage('CFG')->get()
-        );
-        $this->oRPC->open($this->aConfig['queueURL']);
-        $aResponse = $this->oRPC->execute(
-            'enqueue',
-            array(
-                'host_id' => $this->aConfig['hostId'],
-                'app_key' => $this->aConfig['appKey'],
-                'pk_id'   => $this->aConfig['privateKeyId'],
-                'dec_key' => $this->aConfig['decryptionKey'],
-                'tx_data' => $txData
-            )
-        );
+        $aResponse =
+            $this->oRPC->exec(
+                'mr-queue',
+                'enqueue',
+                array(
+                    'host_id' => $this->aConfig['hostId'],
+                    'app_key' => $this->aConfig['appKey'],
+                    'pk_id'   => $this->aConfig['privateKeyId'],
+                    'dec_key' => $this->aConfig['decryptionKey'],
+                    'tx_data' => $txData
+                )
+            );
+
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");
         }
@@ -155,16 +163,15 @@ class Queue{
         }
         $this->queuedId = $aResponse['id'];
 
-        $oRequest = new Request(Registry::useStorage('CFG')->get());
-        $oRequest->send($this->aConfig['signerURL']);
-
-        $aResponse = $this->oRPC->execute(
-            'get',
-            array(
-                'host_id' => $this->aConfig['hostId'],
-                'app_key' => $this->aConfig['appKey']
-            )
-        );
+        $aResponse =
+            $this->oRPC->exec(
+                'mr-queue',
+                'get',
+                array(
+                    'host_id' => $this->aConfig['hostId'],
+                    'app_key' => $this->aConfig['appKey']
+                )
+            );
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");
         }
@@ -195,7 +202,8 @@ class Queue{
      * @return void
      */
     protected function archiveTx($status, $comment, $txHash = ''){
-        $aResponse = $this->oRPC->execute(
+        $aResponse = $this->oRPC->exec(
+            'mr-queue',
             'archive',
             array(
                 'host_id' => $this->aConfig['hostId'],
