@@ -122,17 +122,28 @@ class RPC {
     /**
      * Execute JSON RPC command.
      *
-     * @param string $command   RPC call command
-     * @param mixed $aParams    RPC call parameters
-     * @param bool $log         Request and result data will be logged if true
-     * @param bool $cache       Result data will be cached if true (not recommended for send/broadcast)
+     * @param  string $command   RPC call command
+     * @param  mixed  $aParams   RPC call parameters
+     * @param  bool   $log       Request and result data will be logged if true
+     * @param  bool   $cache     Result data will be cached if true (not recommended for send/broadcast)
      * @return array
+     * @throws Exception
      */
     public function exec($daemon, $command, $aParams = array(), $log = false, $cache = false){
 
         // Check if daemon is known
-        if(!in_array($daemon, array_keys($this->aServices))){
-            throw new \Exception("Unknown daemon: " . $daemon, -1);
+        if(!isset($this->aServices[$daemon]) || !is_object($this->aServices[$daemon])){
+            throw new \Exception(
+                isset($this->aServices[$daemon])
+                    ? sprintf(
+                        "Invalid daemon '%s' object:\n%s",
+                        $daemon,
+                        var_export($this->aServices[$daemon])
+                    ) : sprintf(
+                        "Unknown daemon '%s'",
+                        $daemon
+                    )
+            );
         }
 
         /* @var $oLogger \AmiLabs\Logger */
