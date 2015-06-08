@@ -260,7 +260,7 @@ class Counterparty implements ILayer
                 $aResult = array(
                     'source'      => $source,
                     'destination' => $destination,
-                    'asset'       => '-',
+                    'asset'       => 'BTC',
                     'quantity'    => $quantity,
                     'type'        => self::TXN_TYPE_SEND
                 );
