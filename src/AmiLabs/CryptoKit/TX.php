@@ -1,12 +1,17 @@
 <?php
 
 namespace AmiLabs\CryptoKit;
+use AmiLabs\DevKit\Registry;
 
-require_once PATH_LIB . '/artemko7v/php-op_return/php-OP_RETURN.php';
+if(!function_exists('coinspark_unpack_raw_txn')){
+    $pathLib = Registry::useStorage('CFG')->get('path/lib');
+    require_once $pathLib . '/artemko7v/php-op_return/php-OP_RETURN.php';
+    unset($pathLib);
+}
 
 /**
  * Transaction helper class.
- * 
+ *
  * @todo: move to BlockchainLayer subclass, like BlockchainIO::...->getTXHelper();
  */
 class TX {
@@ -45,12 +50,12 @@ class TX {
      */
     public static function addOpReturnOutput($rawTXN, $metadata)
 	{
-		$aTXNunpacked = coinspark_unpack_raw_txn($rawTXN);
-		$aTXNunpacked['vout'][] = array(
-			'value' => 0,
-			'scriptPubKey' => '6a' . reset(unpack('H*', chr(strlen($metadata)) . $metadata)),
-		);
-		return coinspark_pack_raw_txn($aTXNunpacked);
+            $aTXNunpacked = coinspark_unpack_raw_txn($rawTXN);
+            $aTXNunpacked['vout'][] = array(
+                    'value' => 0,
+                    'scriptPubKey' => '6a' . reset(unpack('H*', chr(strlen($metadata)) . $metadata)),
+            );
+            return coinspark_pack_raw_txn($aTXNunpacked);
 	}
 
     /**
@@ -128,7 +133,7 @@ class TX {
 
     /**
      * Converts float value into Satoshis
-     * 
+     *
      * @param float $value  Value to convert to Satoshis
      * @return int
      */
@@ -139,12 +144,12 @@ class TX {
 
     /**
      * Converts Satoshis value into float value
-     * 
+     *
      * @param int $value  Value in Satoshi to convert
      * @return float
      */
     public static function satoshiToFloat($value)
     {
         return $value / self::SATOSHI;
-    }    
+    }
 }
