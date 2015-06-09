@@ -246,13 +246,22 @@ class Counterparty implements ILayer
                     if(
                         isset($aVOut['scriptPubKey']['type']) &&
                         isset($aVOut['scriptPubKey']['addresses']) &&
-                        'pubkeyhash' == $aVOut['scriptPubKey']['type'] &&
+                        in_array($aVOut['scriptPubKey']['type'], array('pubkeyhash', 'multisig')) &&
                         isset($aVOut['scriptPubKey']['addresses'])
                     ){
-                        if('' == $destination){
-                            $destination = $aVOut['scriptPubKey']['addresses'][0];
+                        $qty = sizeof($aVOut['scriptPubKey']['addresses']);
+                        if($qty > 1){
+                            $address =
+                                $qty . '_' .
+                                implode('_', $aVOut['scriptPubKey']['addresses']) .
+                                '_' . $qty;
                         }else{
-                            $source = $aVOut['scriptPubKey']['addresses'][0];
+                            $address = $aVOut['scriptPubKey']['addresses'][0];
+                        }
+                        if('' == $destination){
+                            $destination = $address;
+                        }else{
+                            $source = $address;
                         }
                     }
                     // $quantity += $aVOut['value'];
