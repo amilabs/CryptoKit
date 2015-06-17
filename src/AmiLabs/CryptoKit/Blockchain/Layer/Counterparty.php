@@ -281,12 +281,16 @@ class Counterparty implements ILayer
         $data = $aResult[4];
         $type = hexdec(mb_substr($data, 0, 8));
         $assetName = mb_substr($data, 8, 16);
+        var_dump($aResult);
+        var_dump($data);
+        var_dump($assetName);###
         $quantity = mb_substr($data, 24, 16);
         $assetId =
             new BigNumber(
                 BigNumber::convertToBase10($assetName, 16)
             );
-        if('00000000' != mb_substr($assetName, 0, 8)){
+        // if('00000000' != mb_substr($assetName, 0, 8)){
+        if('0' != mb_substr($assetName, 0, 1)){
             $asset = 'A' . $assetId->getValue();
         }else{
             $asset = '';
