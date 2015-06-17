@@ -281,9 +281,6 @@ class Counterparty implements ILayer
         $data = $aResult[4];
         $type = hexdec(mb_substr($data, 0, 8));
         $assetName = mb_substr($data, 8, 16);
-        var_dump($aResult);
-        var_dump($data);
-        var_dump($assetName);###
         $quantity = mb_substr($data, 24, 16);
         $assetId =
             new BigNumber(
