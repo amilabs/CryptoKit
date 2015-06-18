@@ -69,8 +69,12 @@ class RPC {
             FALSE === Registry::useStorage('CFG')->get('CryptoKit/testnet', FALSE)
                 ? ''
                 : '-testnet';
-        $aConfigs = Registry::useStorage('CFG')->get('CryptoKit/RPC/services', FALSE);
-
+        $servicesCfgKey = 'CryptoKit/RPC/services';
+        // Use services-testnet key if testnet flag is set to true and key exists
+        if($testnet && Registry::useStorage('CFG')->exists($servicesCfgKey . $testnet)){
+            $servicesCfgKey .= $testnet;
+        }
+        $aConfigs = Registry::useStorage('CFG')->get($servicesCfgKey, FALSE);
         if(is_array($aConfigs)){
             $needToSearchConfig = true;
             $oCache = Cache::get('rpc-service' . $testnet);
@@ -110,9 +114,6 @@ class RPC {
                     }
                 }
             }
-        }else{
-            // Old Style Config (todo: deprecate)
-            $aConfig = Registry::useStorage('CFG')->get('RPCServices', FALSE);
         }
         if(!is_array($aConfig)){
             throw new \Exception('Blockchain RPC configuration missing');
