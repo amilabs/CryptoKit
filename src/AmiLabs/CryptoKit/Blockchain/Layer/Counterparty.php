@@ -286,7 +286,8 @@ class Counterparty implements ILayer
             new BigNumber(
                 BigNumber::convertToBase10($assetName, 16)
             );
-        if('00000000' != mb_substr($assetName, 0, 8)){
+        // if('00000000' != mb_substr($assetName, 0, 8)){
+        if('0' != mb_substr($assetName, 0, 1)){
             $asset = 'A' . $assetId->getValue();
         }else{
             $asset = '';
