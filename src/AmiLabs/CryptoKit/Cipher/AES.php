@@ -1,6 +1,6 @@
 <?php
 
-namespace AmiLabs\CryptoKit\Crypt\Cipher;
+namespace AmiLabs\CryptoKit\Cipher;
 
 use AmiLabs\CryptoKit\ICipher;
 
