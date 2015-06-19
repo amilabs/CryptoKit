@@ -12,7 +12,7 @@ interface ICipher{
      * @param  string $password
      * @param  string $salt
      * @param  string $cipher
-     * @return array  ['salt' => '...', 'key' => '...', 'iv' => '...']
+     * @return array  ['key' => '...', 'iv' => '...']
      */
     public function generateKey($password, $salt, $cipher);
 }

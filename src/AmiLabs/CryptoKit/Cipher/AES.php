@@ -14,7 +14,7 @@ class AES implements ICipher{
      * @param  string $password
      * @param  string $salt
      * @param  string $cipher
-     * @return array  ['salt' => '...', 'key' => '...', 'iv' => '...']
+     * @return array  ['key' => '...', 'iv' => '...']
      */
     public function generateKey($password, $salt, $cipher){
         /**
@@ -43,7 +43,6 @@ class AES implements ICipher{
             $result .= $aMD5Hash[$i];
         }
         $aResult = array(
-            'salt' => $aMD5Hash[$i - 1],
             'key'  => substr($result, 0, 32),
             'iv'   => substr($result, 32,16),
         );
