@@ -9,7 +9,7 @@ use AmiLabs\CryptoKit\ICipher;
  */
 class AES implements ICipher{
     /**
-     * Generates salt, key and initialization vector.
+     * Generates key and initialization vector.
      *
      * @param  string $password
      * @param  string $salt

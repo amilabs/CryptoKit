@@ -7,7 +7,7 @@ namespace AmiLabs\CryptoKit;
  */
 interface ICipher{
     /**
-     * Generates salt, key and initialization vector.
+     * Generates key and initialization vector.
      *
      * @param  string $password
      * @param  string $salt
