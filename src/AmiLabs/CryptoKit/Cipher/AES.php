@@ -42,12 +42,10 @@ class AES implements ICipher{
           $aMD5Hash[$i] = md5($aMD5Hash[$i - 1] . $data00, TRUE);
             $result .= $aMD5Hash[$i];
         }
-        $key = substr($result, 0, 32);
-        $iv  = substr($result, 32,16);
         $aResult = array(
             'salt' => $salt,
-            'key'  => substr($salted, 0, 32),
-            'iv'   => substr($salted, 32,16),
+            'key'  => substr($result, 0, 32),
+            'iv'   => substr($result, 32,16),
         );
 
         return $aResult;
