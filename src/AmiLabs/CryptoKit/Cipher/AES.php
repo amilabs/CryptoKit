@@ -39,11 +39,11 @@ class AES implements ICipher{
         $aMD5Hash[0] = md5($data00, TRUE);
         $result = $aMD5Hash[0];
         for($i = 1; $i < $rounds; ++$i){
-          $aMD5Hash[$i] = md5($aMD5Hash[$i - 1] . $data00, TRUE);
+            $aMD5Hash[$i] = md5($aMD5Hash[$i - 1] . $data00, TRUE);
             $result .= $aMD5Hash[$i];
         }
         $aResult = array(
-            'salt' => $salt,
+            'salt' => $aMD5Hash[$i - 1],
             'key'  => substr($result, 0, 32),
             'iv'   => substr($result, 32,16),
         );

@@ -29,7 +29,7 @@ class OpenSSL implements ICrypt{
      * @return string
      */
     public function encrypt($data, $cipher, $password, $iv = ''){
-        $encrypted = openssl_encrypt(
+        $encrypted = @openssl_encrypt(
             $data,
             $cipher,
             $password,
