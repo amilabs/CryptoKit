@@ -177,7 +177,7 @@ class RPC {
                 }
             }catch(\Exception $e){
                 $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
-                throw new \Exception($e->getMessage(), -1, $e);
+                throw new \Exception($e->getMessage(), $e->getCode(), $e);
             }
         }
         $oLogger->log('Result: ' . var_export($aResult, true));
