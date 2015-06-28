@@ -9,13 +9,6 @@ use AmiLabs\DevKit\Logging;
  */
 class JSONMeta extends \Deepelopment\Net\RPC\Server\JSONMeta{
     /**
-     * @param array  $options  Layer options, support 'envoronment' and 'request' keys
-     */
-    public function __construct(array $aOptions = array()){
-        parent::__construct($aOptions);
-    }
-
-    /**
      * Returns metadata parameters.
      *
      * @return array
