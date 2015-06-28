@@ -2,11 +2,19 @@
 
 namespace AmiLabs\CryptoKit\Net\RPC\Server;
 
+use AmiLabs\DevKit\Logging;
+
 /**
  * Remote Procedure Call JSON server layer supporting metadata.
  */
-class JSONMeta extends \Deepelopment\Net\RPC\Server\JSONMeta
-{
+class JSONMeta extends \Deepelopment\Net\RPC\Server\JSONMeta{
+    /**
+     * @param array  $options  Layer options, support 'envoronment' and 'request' keys
+     */
+    public function __construct(array $aOptions = array()){
+        parent::__construct($aOptions);
+    }
+
     /**
      * Returns metadata parameters.
      *
