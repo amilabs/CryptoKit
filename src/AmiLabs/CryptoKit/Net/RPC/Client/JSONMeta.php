@@ -14,8 +14,10 @@ class JSONMeta extends \Deepelopment\Net\RPC\Client\JSONMeta
      */
     protected function getMetaParams(){
         return array(
+            /*
             '_request_id',
             '_request_count',
+             */
         );
     }
 }
