@@ -185,7 +185,7 @@ class RPC {
         return $aResult;
     }
     /**
-     * Adds cahe rule callback for specified method.
+     * Adds cache rule callback for specified method.
      *
      * @param string $daemon
      * @param string $method

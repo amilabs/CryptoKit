@@ -146,7 +146,9 @@ class Queue{
                     'app_key' => $this->aConfig['appKey'],
                     'pk_id'   => $this->aConfig['privateKeyId'],
                     'dec_key' => $this->aConfig['decryptionKey'],
-                    'tx_data' => $txData
+                    'tx_data' => $txData,
+                    '_request_id'    => uniqid('', TRUE),
+                    '_request_count' => 1
                 )
             );
 
@@ -169,7 +171,9 @@ class Queue{
                 'get',
                 array(
                     'host_id' => $this->aConfig['hostId'],
-                    'app_key' => $this->aConfig['appKey']
+                    'app_key' => $this->aConfig['appKey'],
+                    '_request_id'    => uniqid('', TRUE),
+                    '_request_count' => 1
                 )
             );
         if(!is_array($aResponse)){
@@ -215,7 +219,9 @@ class Queue{
                         'comment' => $comment,
                         'tx_hash' => $txHash
                     )
-                )
+                ),
+                '_request_id'    => uniqid('', TRUE),
+                '_request_count' => 1
             )
         );
         if(!is_array($aResponse)){
