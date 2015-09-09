@@ -165,6 +165,9 @@ class Queue{
         }
         $this->queuedId = $aResponse['id'];
 
+        // Sign transactions
+        $this->oRPC->exec('mr-signer', 'sign', array());
+
         $aResponse =
             $this->oRPC->exec(
                 'mr-queue',
