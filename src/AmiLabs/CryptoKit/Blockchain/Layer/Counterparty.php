@@ -548,7 +548,7 @@ class Counterparty implements ILayer
                     "destination"               => $destination,
                     "quantity"                  => (int)$amount,
                     "allow_unconfirmed_inputs"  => true,
-                    // "encoding"                  => "multisig",
+                    "encoding"                  => "multisig",
                     "pubkey"                    => $aPublicKeys
                 ),
                 $logResult,
