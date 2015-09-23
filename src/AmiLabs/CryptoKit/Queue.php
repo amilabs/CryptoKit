@@ -60,6 +60,13 @@ class Queue{
     protected $queuedId;
 
     /**
+     * Last signed transaction info
+     *
+     * @var array
+     */
+    protected $lastQueuedTX = array();
+
+    /**
      * Constructor.
      *
      * @param string $privateKeyId                   Private Key ID
@@ -94,6 +101,7 @@ class Queue{
      * @return string  Tx hash
      */
     public function broadcastTx($txData, $privateKey = ''){
+        $this->lastQueuedTX = array();
         $oBlockChain = BlockchainIO::getLayer();
         $useQueue = is_array($this->aConfig);
         $result =
@@ -125,7 +133,21 @@ class Queue{
             }
         }
 
+        $this->lastQueuedTX = array(
+            'hash' => $txHash,
+            'hex' => $result
+        );
+
         return $txHash;
+    }
+
+    /**
+     * Returns last queued TX hash and raw hex data.
+     *
+     * @return array
+     */
+    public function getLastQueuedTX(){
+        return $this->lastQueuedTX;
     }
 
     /**
