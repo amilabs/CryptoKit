@@ -184,8 +184,8 @@ class Counterparty implements ILayer
                 'bitcoind',
                 'getrawmempool',
                 array(),
-                $logResult,
-                FALSE // Never cached
+                FALSE, // $logResult,
+                FALSE  // Never cached
             );
     }
 
