@@ -149,10 +149,12 @@ class RPC {
 
         /* @var $oLogger \AmiLabs\Logger */
         $oLogger = Logger::get('rpc-' . $daemon, FALSE, $log);
-        $oLogger->log(Logger::DELIMITER);
-        $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
-        $oLogger->log('Execute command: ' . $command);
-        $oLogger->log('Params: ' . var_export($aParams, true));
+        if($log){
+            $oLogger->log(Logger::DELIMITER);
+            $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
+            $oLogger->log('Execute command: ' . $command);
+            $oLogger->log('Params: ' . var_export($aParams, true));
+        }
 
         $cacheName = $daemon . '_' . $command . '_' . md5(serialize($aParams));
 
@@ -161,7 +163,9 @@ class RPC {
             $oCache = Cache::get($cacheName);
             if($oCache->exists()){
                 $aResult = $oCache->load();
-                $oLogger->log('CACHE: Data loaded from cache');
+                if($log){
+                    $oLogger->log('CACHE: Data loaded from cache');
+                }
             }
         }
         if(!isset($aResult)){
@@ -170,18 +174,25 @@ class RPC {
                 if($cache){
                     if(!is_null($aResult) && $this->canCacheResponse($daemon, $command, $aResult)){
                         $oCache->save($aResult);
-                        $oLogger->log('CACHE: Response was stored in cache');
+                        if($log){
+                            $oLogger->log('CACHE: Response was stored in cache');
+                        }
                     }else{
-                        $oLogger->log('CACHE: Response was NOT stored in cache due to cache rules or NULL value');
+                        if($log){
+                            $oLogger->log('CACHE: Response was NOT stored in cache due to cache rules or NULL value');
+                        }
                     }
                 }
             }catch(\Exception $e){
-                $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
+                if($log){
+                    $oLogger->log('ERROR: ' . var_export($e->getMessage(), true));
+                }
                 throw new \Exception($e->getMessage(), $e->getCode(), $e);
             }
         }
-        $oLogger->log('Result: ' . var_export($aResult, true));
-
+        if($log){
+            $oLogger->log('Result: ' . var_export($aResult, true));
+        }
         return $aResult;
     }
     /**
