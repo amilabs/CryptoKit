@@ -148,7 +148,7 @@ class RPC {
         }
 
         /* @var $oLogger \AmiLabs\Logger */
-        $oLogger = Logger::get('rpc-' . $daemon, FALSE, $log);
+        $oLogger = Logger::get('rpc-' . $daemon, FALSE, TRUE);
         if($log){
             $oLogger->log(Logger::DELIMITER);
             $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
