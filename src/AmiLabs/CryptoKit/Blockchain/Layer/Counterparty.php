@@ -517,8 +517,7 @@ class Counterparty implements ILayer
             'counterpartyd',
             'get_balances',
             $aParams + $aExtraParams,
-            $logResult,
-            FALSE
+            $logResult
         );
 
         return $aBalances;
@@ -551,8 +550,7 @@ class Counterparty implements ILayer
                     "encoding"                  => "multisig",
                     "pubkey"                    => $aPublicKeys
                 ),
-                $logResult,
-                FALSE
+                $logResult
             );
     }
 
@@ -576,8 +574,7 @@ class Counterparty implements ILayer
                     array(),
                     array($privateKey)
                 ),
-                $logResult,
-                FALSE
+                $logResult
             );
         if(isset($result['hex'])){
             $result = $result['hex'];
@@ -599,7 +596,6 @@ class Counterparty implements ILayer
         $result = $this->getRPC()->execBitcoind(
             'sendrawtransaction',
             array($rawData),
-            FALSE,
             $logResult
         );
 
