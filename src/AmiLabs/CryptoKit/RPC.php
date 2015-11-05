@@ -149,7 +149,6 @@ class RPC {
 
         /* @var $oLogger \AmiLabs\Logger */
         $oLogger = Logger::get('rpc-' . $daemon, FALSE, TRUE);
-        error_log($daemon . ' - ' . $command . ' - logging ' . var_export($log, true), E_USER_WARNING);
         if($log){
             $oLogger->log(Logger::DELIMITER);
             $oLogger->log('Call to: ' . $daemon . ' (' . self::$aConfig[$daemon]['address'] .')');
