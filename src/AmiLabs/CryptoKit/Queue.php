@@ -171,7 +171,8 @@ class Queue{
                     'tx_data' => $txData,
                     '_request_id'    => uniqid('', TRUE),
                     '_request_count' => 1
-                )
+                ),
+                TRUE
             );
 
         if(!is_array($aResponse)){
@@ -201,7 +202,8 @@ class Queue{
                     'app_key' => $this->aConfig['appKey'],
                     '_request_id'    => uniqid('', TRUE),
                     '_request_count' => 1
-                )
+                ),
+                TRUE
             );
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");
@@ -249,7 +251,8 @@ class Queue{
                 ),
                 '_request_id'    => uniqid('', TRUE),
                 '_request_count' => 1
-            )
+            ),
+            TRUE
         );
         if(!is_array($aResponse)){
             throw new ErrorException("Cannot parse response");

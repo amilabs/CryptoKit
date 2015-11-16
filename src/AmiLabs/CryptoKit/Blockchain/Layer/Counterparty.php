@@ -563,7 +563,7 @@ class Counterparty implements ILayer
      * @return string
      * @todo   Cover by unit tests
      */
-    public function signRawTx($rawData, $privateKey, $logResult = FALSE)
+    public function signRawTx($rawData, $privateKey, $logResult = TRUE)
     {
         $result =
             $this->getRPC()->exec(
@@ -592,7 +592,7 @@ class Counterparty implements ILayer
      * @return string
      * @todo   Cover by unit tests
      */
-    public function sendRawTx($rawData, $logResult = FALSE){
+    public function sendRawTx($rawData, $logResult = TRUE){
         $result = $this->getRPC()->execBitcoind(
             'sendrawtransaction',
             array($rawData),
