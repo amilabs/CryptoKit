@@ -30,8 +30,8 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
             array(
                 CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
                 CURLOPT_SSL_VERIFYHOST => FALSE,
-                'Deepelopment\\Logger' =>
-                    Registry::useStorage('CFG')->get('Deepelopment\\Logger', array())
+                'AmiLabs\\Logger' =>
+                    Registry::useStorage('CFG')->get('AmiLabs\\Logger', array())
             )
         );
         $this->oClient->open($aConfig['address']);
