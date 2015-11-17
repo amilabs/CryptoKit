@@ -5,7 +5,7 @@ namespace AmiLabs\CryptoKit\Net\RPC\Client;
 /**
  * Remote Procedure Call JSON client layer supporting metadata.
  */
-class JSONMeta extends \Deepelopment\Net\RPC\Client\JSONMeta
+class JSONMeta extends \AmiLabs\JSON-RPC\RPC\Client\JSONMeta
 {
     /**
      * Returns metadata parameters.

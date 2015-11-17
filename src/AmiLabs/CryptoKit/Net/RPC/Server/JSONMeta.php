@@ -7,7 +7,7 @@ use AmiLabs\DevKit\Logging;
 /**
  * Remote Procedure Call JSON server layer supporting metadata.
  */
-class JSONMeta extends \Deepelopment\Net\RPC\Server\JSONMeta{
+class JSONMeta extends \AmiLabs\JSON-RPC\RPC\Server\JSONMeta{
     /**
      * Returns metadata parameters.
      *

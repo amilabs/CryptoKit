@@ -13,7 +13,7 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
     /**
      * JSON RPC Client object
      *
-     * @var \Deepelopment\Net\RPC\Client\JSON
+     * @var \AmiLabs\JSON-RPC\RPC\Client\JSON
      */
     protected $oClient;
 
@@ -23,10 +23,10 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
      * @param array $aConfig  Driver configuration
      */
     public function __construct(array $aConfig){
-        $this->oClient = \Deepelopment\Net\RPC::getLayer(
+        $this->oClient = \AmiLabs\JSON-RPC\RPC::getLayer(
             // 'AmiLabs\\CryptoKit\\Net\\RPC\\Client\\JSON',
             'JSON',
-            \Deepelopment\Net\RPC::TYPE_CLIENT,
+            \AmiLabs\JSON-RPC\RPC::TYPE_CLIENT,
             array(
                 CURLOPT_SSL_VERIFYPEER => FALSE, // Todo: use from configuration, only for HTTPS
                 CURLOPT_SSL_VERIFYHOST => FALSE,
