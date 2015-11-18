@@ -187,6 +187,15 @@ class RPC {
                 if($log){
                     $oLogger->log('ERROR: ' . var_export($e->getCode(), true) . ' ' . var_export($e->getMessage(), true));
                 }
+                $srvCode = substr($daemon, 0, 1) . substr($daemon, -2);
+                $cmdCode = '';
+                $aCommandParts = explode('_', $command);
+                foreach($aCommandParts as $commandPart){
+                    $cmdCode .= substr($commandPart, 0, 1);
+                }
+                //$errMessage = $e->getMessage();
+                $e->srvCode = $srvCode;
+                $e->cmdCode = $cmdCode;
                 throw new \Exception($e->getMessage(), $e->getCode(), $e);
             }
         }
