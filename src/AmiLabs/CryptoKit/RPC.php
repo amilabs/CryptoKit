@@ -193,10 +193,10 @@ class RPC {
                 foreach($aCommandParts as $commandPart){
                     $cmdCode .= substr($commandPart, 0, 1);
                 }
-                //$errMessage = $e->getMessage();
-                $e->srvCode = $srvCode;
-                $e->cmdCode = $cmdCode;
-                throw new \Exception($e->getMessage(), $e->getCode(), $e);
+                $oException = new \Exception($e->getMessage(), $e->getCode(), $e);
+                $oException->srvCode = $srvCode;
+                $oException->cmdCode = $cmdCode;
+                throw $oException;
             }
         }
         if($log){
