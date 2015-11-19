@@ -205,7 +205,7 @@ class RPC {
                     $node = 2;
                 }
 
-                if(!isset($GLOBALS['JSONRPC/State'])){
+                /*if(!isset($GLOBALS['JSONRPC/State'])){*/
                     $GLOBALS['JSONRPC/State'] = json_encode(
                         array(
                             'srvCode' => $srvCode,
@@ -216,7 +216,7 @@ class RPC {
                             'node'    => $node
                         )
                     );
-                }
+                /*}*/
                 $oException = new \Exception($e->getMessage(), $e->getCode(), $e);
                 $oException->srvCode = $srvCode;
                 $oException->cmdCode = $cmdCode;
