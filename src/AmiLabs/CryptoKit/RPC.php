@@ -190,8 +190,12 @@ class RPC {
                 $srvCode = substr($daemon, 0, 1) . substr($daemon, -2);
                 $cmdCode = '';
                 $aCommandParts = explode('_', $command);
-                foreach($aCommandParts as $commandPart){
-                    $cmdCode .= substr($commandPart, 0, 1);
+                if(sizeof($aCommandParts) < 2){
+                    $cmdCode = substr($aCommandParts[0], 0, 4);
+                }else{
+                    foreach($aCommandParts as $commandPart){
+                        $cmdCode .= substr($commandPart, 0, 1);
+                    }
                 }
                 $oException = new \Exception($e->getMessage(), $e->getCode(), $e);
                 $oException->srvCode = $srvCode;
