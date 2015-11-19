@@ -197,6 +197,17 @@ class RPC {
                         $cmdCode .= substr($commandPart, 0, 1);
                     }
                 }
+                if(!isset($GLOBALS['JSONRPC/State'])){
+                    $GLOBALS['JSONRPC/State'] = json_encode(
+                        array(
+                            'srvCode' => $srvCode,
+                            'cmdCode' => $cmdCode,
+                            'expCode' => $e->getCode(),
+                            'expMess' => $e->getMessage(),
+                            'expTrce' => $e->getTraceAsString()
+                        )
+                    );
+                }
                 $oException = new \Exception($e->getMessage(), $e->getCode(), $e);
                 $oException->srvCode = $srvCode;
                 $oException->cmdCode = $cmdCode;
