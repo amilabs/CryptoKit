@@ -197,6 +197,14 @@ class RPC {
                         $cmdCode .= substr($commandPart, 0, 1);
                     }
                 }
+
+                $node = '';
+                if(FALSE !== strpos($e->getMessage(), 'node1.')){
+                    $node = 1;
+                }elseif(FALSE !== strpos($e->getMessage(), 'node2.')){
+                    $node = 2;
+                }
+
                 if(!isset($GLOBALS['JSONRPC/State'])){
                     $GLOBALS['JSONRPC/State'] = json_encode(
                         array(
@@ -204,7 +212,8 @@ class RPC {
                             'cmdCode' => $cmdCode,
                             'expCode' => $e->getCode(),
                             'expMess' => $e->getMessage(),
-                            'expTrce' => $e->getTraceAsString()
+                            'expTrce' => $e->getTraceAsString(),
+                            'node'    => $node
                         )
                     );
                 }
