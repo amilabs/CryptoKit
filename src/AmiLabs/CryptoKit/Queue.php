@@ -190,7 +190,7 @@ class Queue{
 
         // Sign transactions
         try{
-            $this->oRPC->exec('mr-signer', 'sign', array());
+            $this->oRPC->exec('mr-signer', 'sign', array(), FALSE, FALSE, TRUE);
         }catch(\Exception $e){}
 
         $aResponse =
