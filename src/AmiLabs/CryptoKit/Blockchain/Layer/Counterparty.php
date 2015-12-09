@@ -60,7 +60,7 @@ class Counterparty implements ILayer
             $aContextOptions = array('http' => array('timeout' => 5), 'ssl'  => array('verify_peer' => FALSE, 'verify_peer_name' => FALSE));
             $state = @file_get_contents($address, FALSE, stream_context_create($aContextOptions));
             $result = ($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)) && is_array($aState) && isset($aState['counterparty-server']) && ('OK' !== $aState['counterparty-server']));
-            $oLogger->log(result ? ('OK: ' . $address . ' is UP and RUNNING, using as primary') : ('ERROR: ' . $address . ' is DOWN, skipping'));
+            $oLogger->log($result ? ('OK: ' . $address . ' is UP and RUNNING, using as primary') : ('ERROR: ' . $address . ' is DOWN, skipping'));
         }else{
             // Can not check state without Counterblock
             $oLogger->log('SKIP: No counterblock information in RPC config');
