@@ -54,28 +54,16 @@ class Counterparty implements ILayer
     public function checkServerConfig(array $aConfig)
     {
         $result = TRUE;
-        // Can not check state without Counterblock
+        $oLogger = Logger::get('check-servers');
         if(isset($aConfig['counterblockd'])){
-            $oLogger = Logger::get('check-servers');
             $address = $aConfig['counterblockd']['address'];
-            $aContextOptions = array(
-                'http' => array(
-                    'timeout' => 5,
-                ),
-                'ssl'  => array(
-                    'verify_peer'      => FALSE,
-                    'verify_peer_name' => FALSE,
-                ),
-            );
+            $aContextOptions = array('http' => array('timeout' => 5), 'ssl'  => array('verify_peer' => FALSE, 'verify_peer_name' => FALSE));
             $state = @file_get_contents($address, FALSE, stream_context_create($aContextOptions));
-            if(!($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)))){
-                $oLogger->log('ERROR: ' . $address . ' is DOWN, skipping');
-                $result = FALSE;
-            }else{
-                // Check if Counterparty state is OK
-                $result = isset($aState['counterparty-server']) && ($aState['counterparty-server'] == 'OK');
-                $oLogger->log('OK: ' . $address . ' is UP and RUNNING, using as primary');
-            }
+            $result = ($state && (substr($state, 0, 1) == '{') && ($aState = json_decode($state, TRUE)) && is_array($aState) && isset($aState['counterparty-server']) && ('OK' !== $aState['counterparty-server']));
+            $oLogger->log(result ? ('OK: ' . $address . ' is UP and RUNNING, using as primary') : ('ERROR: ' . $address . ' is DOWN, skipping'));
+        }else{
+            // Can not check state without Counterblock
+            $oLogger->log('SKIP: No counterblock information in RPC config');
         }
         return $result;
     }
