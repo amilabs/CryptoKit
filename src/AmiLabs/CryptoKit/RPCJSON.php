@@ -49,8 +49,8 @@ class RPCJSON extends RPCServiceClient implements IRPCServiceClient{
             $command,
             $aParams,
             array(
-                CURLOPT_CONNECTTIMEOUT => 5,
-                CURLOPT_TIMEOUT        => 30,
+                CURLOPT_CONNECTTIMEOUT => 15,
+                CURLOPT_TIMEOUT        => 240,
             )
         );
     }
