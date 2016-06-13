@@ -580,7 +580,7 @@ class Counterparty implements ILayer
                     "asset"                     => $asset,
                     "source"                    => $source,
                     "destination"               => $destination,
-                    "quantity"                  => (int)$amount,
+                    "quantity"                  => (int)TX::floatToSatoshi($amount),
                     "allow_unconfirmed_inputs"  => true,
                     "encoding"                  => "multisig",
                     "pubkey"                    => $aPublicKeys,
