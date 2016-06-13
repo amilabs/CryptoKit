@@ -534,7 +534,6 @@ class Counterparty implements ILayer
      *
      * @param string $aAddresses    Addresses list
      * @param bool   $logResult     Flag specifying to log result
-     * @param bool   $cacheResult   Flag specifying to cache result
      * @return array
      */
     public function getFuelBalance($aAddresses, $logResult = FALSE){

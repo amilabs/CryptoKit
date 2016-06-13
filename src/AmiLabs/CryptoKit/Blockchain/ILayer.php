@@ -75,7 +75,7 @@ interface ILayer
      * @param bool   $cacheResult   Flag specifying to cache result
      * @return array
      */
-    public function getFuelBalance($aAddresses, $logResult = FALSE, $cacheResult = TRUE);
+    public function getFuelBalance($aAddresses, $logResult = FALSE);
 
     /**
      * Returns newest unconfirmed transactions.
