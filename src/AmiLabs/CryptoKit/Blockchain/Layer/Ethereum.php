@@ -111,7 +111,7 @@ class Ethereum implements ILayer
      */
     public function getBlock($blockHash, $logResult = FALSE, $cacheResult = TRUE)
     {
-        $result = $this->getRPC()->exec('eth-service', 'getBlock', array($blockHash), $logResult);
+        $result = $this->getRPC()->exec('eth-service', 'getBlock', array('blockNumber' => $blockHash), $logResult);
         return $result;
     }
 
