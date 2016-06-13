@@ -141,6 +141,13 @@ interface ILayer
     );
 
     /**
+     * Returns wallets/assets balances.
+     *
+     * @return string
+     */
+    public function getBalancesServiceName();
+
+    /**
      * Creates specified tx sending amount of asset from source
      * to destination and returns raw tx data.
      *

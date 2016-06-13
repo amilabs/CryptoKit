@@ -102,6 +102,15 @@ class Ethereum implements ILayer
     }
 
     /**
+     * Returns wallets/assets balances.
+     *
+     * @return string
+     */
+    public function getBalancesServiceName(){
+        return 'eth-service';
+    }
+
+    /**
      * Returns list of block transactions.
      *
      * @param  string $blockHash

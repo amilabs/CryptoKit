@@ -100,6 +100,15 @@ class Counterparty implements ILayer
     }
 
     /**
+     * Returns wallets/assets balances.
+     *
+     * @return string
+     */
+    public function getBalancesServiceName(){
+        return 'mr-balances';
+    }
+
+    /**
      * Returns list of block transactions.
      *
      * @param  string $blockHash
