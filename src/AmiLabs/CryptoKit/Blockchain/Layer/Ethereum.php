@@ -109,9 +109,10 @@ class Ethereum implements ILayer
      * @param  bool   $cacheResult  Flag specifying to cache result
      * @return mixed
      */
-    public function getBlock($blockHash, $logResult = false, $cacheResult = true)
+    public function getBlock($blockHash, $logResult = FALSE, $cacheResult = TRUE)
     {
-        return array();
+        $result = $this->getRPC()->exec('eth-service', 'getBlock', array($blockHash), $logResult);
+        return $result;
     }
 
     /**
@@ -124,17 +125,7 @@ class Ethereum implements ILayer
      */
     public function getBlockInfo($blockIndex, $logResult = FALSE, $cacheResult = TRUE)
     {
-        return array();
-        /*
-        return
-            $this->getRPC()->exec(
-                'counterpartyd',
-                'get_block_info',
-                array('block_index' => $blockIndex),
-                $logResult,
-                $cacheResult
-            );
-        */
+        return $this->getBlock($blockIndex, $logResult, $cacheResult);
     }
 
     /**
