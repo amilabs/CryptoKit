@@ -161,6 +161,23 @@ class Counterparty implements ILayer
     }
 
     /**
+     * Returns number of transaction confirmations.
+     *
+     * @param string $txHash     Transaction hash
+     * @param bool $onlyHex      Return only tx raw hex if set to true
+     * @param bool $logResult    Flag specifying to log result
+     * @return mixed
+     */
+    public function getTxConfirmations($txHash, $logResult = FALSE){
+        $aTxData = $this->getRawTransaction($txHash, TRUE, $logResult, FALSE);
+        $result = 0;
+        if(isset($aTxData['confirmations'])){
+            $result = (int)$aTxData['confirmations'];
+        }
+        return $result;
+    }
+
+    /**
      * Returns newest unconfirmed transactions.
      *
      * @param bool $logResult  Flag specifying to log result
@@ -510,6 +527,36 @@ class Counterparty implements ILayer
         );
 
         return $aBalances;
+    }
+
+    /**
+     * Returns addresse balances of blockchain native coin (BTC, ETH, etc).
+     *
+     * @param string $aAddresses    Addresses list
+     * @param bool   $logResult     Flag specifying to log result
+     * @param bool   $cacheResult   Flag specifying to cache result
+     * @return array
+     */
+    public function getFuelBalance($aAddresses, $logResult = FALSE){
+        $aResult = array();
+        $aAddressBitcoinBalances = array();
+        $aAddressBitcoinBalances = $this->getRPC()->exec(
+            'counterblockd',
+            'get_chain_address_info',
+            array(
+                'with_last_txn_hashes' => 0,
+                'with_uxtos' => FALSE,
+                'addresses' => array($address)
+            ),
+            $logResult
+        );
+
+        if($aAddressBitcoinBalances && is_array($aAddressBitcoinBalances)){
+            foreach($aAddressBitcoinBalances as $aAddressBitcoinBalance){
+                $aResult[$aAddressBitcoinBalance['addr']] = array('BTC' => $aAddressBitcoinBalance['info']['balance']);
+            }
+        }
+        return $aResult;
     }
 
     /**

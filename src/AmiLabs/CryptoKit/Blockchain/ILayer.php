@@ -57,6 +57,27 @@ interface ILayer
     public function getRawTransaction($txHash, $extended = FALSE, $logResult = FALSE, $cacheResult = TRUE);
 
     /**
+     * Returns number of transaction confirmations.
+     *
+     * @param string $txHash     Transaction hash
+     * @param bool $onlyHex      Return only tx raw hex if set to true
+     * @param bool $logResult    Flag specifying to log result
+     * @return mixed
+     */
+    public function getTxConfirmations($txHash, $logResult = FALSE);
+
+
+    /**
+     * Returns addresse balances of blockchain native coin (BTC, ETH, etc).
+     *
+     * @param string $aAddresses    Addresses list
+     * @param bool   $logResult     Flag specifying to log result
+     * @param bool   $cacheResult   Flag specifying to cache result
+     * @return array
+     */
+    public function getFuelBalance($aAddresses, $logResult = FALSE, $cacheResult = TRUE);
+
+    /**
      * Returns newest unconfirmed transactions.
      *
      * @param bool $logResult    Flag specifying to log result
