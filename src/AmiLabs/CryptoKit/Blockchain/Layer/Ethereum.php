@@ -185,120 +185,16 @@ class Ethereum implements ILayer
     )
     {
         $aResult = array();
-
-        /*
-        if($hashPassed){
-            $aData =
-                $this->getRawTransaction($txHash, TRUE, $logResult, $cacheResult);
-            $rawData = $aData['hex'];
-        }else{
-            $rawData = $txHash;
-        }
-
-        try{
-            $aResult = $this->getRPC()->exec(
-                'counterpartyd',
-                'get_tx_info',
-                array(
-                    'tx_hex'      => $rawData,
-                    ### 'block_index' => $aBlock['height']
-                ),
-                $logResult,
-                $cacheResult
+        $aData = $this->getRPC()->exec('eth-service', $hashPassed ? 'getTx' : 'decodeRawTx', array($txHash), $logResult, $cacheResult);
+        if(isset($aData['asset'])){
+            $aResult = array(
+                'source'      => $aData['from'],
+                'destination' => $aData['to'],
+                'asset'       => $aData['asset'],
+                'quantity'    => $aData['quantity'],
+                'type'        => $aData['opType']
             );
-        }catch(Exception $oException){
-            if(
-                -1 == $oException->getCode() &&
-                FALSE !== strpos($oException->getMessage(), 'HTTP code: 500')
-            ){
-                // Not counterparty tx
-                $aDecodedTx = $this->decodeRawTx($rawData);
-                $source = '';
-                $destination = '';
-                $quantity = 0;
-                foreach($aDecodedTx['vout'] as $aVOut){
-                    if(
-                        isset($aVOut['scriptPubKey']['type']) &&
-                        isset($aVOut['scriptPubKey']['addresses']) &&
-                        in_array($aVOut['scriptPubKey']['type'], array('pubkeyhash', 'multisig')) &&
-                        isset($aVOut['scriptPubKey']['addresses'])
-                    ){
-                        $qty = sizeof($aVOut['scriptPubKey']['addresses']);
-                        if($qty > 1){
-                            $address =
-                                $qty . '_' .
-                                implode('_', $aVOut['scriptPubKey']['addresses']) .
-                                '_' . $qty;
-                        }else{
-                            $address = $aVOut['scriptPubKey']['addresses'][0];
-                        }
-                        if('' == $destination){
-                            $destination = $address;
-                        }else{
-                            $source = $address;
-                        }
-                    }
-                    // $quantity += $aVOut['value'];
-                }
-                $aResult = array(
-                    'source'      => $source,
-                    'destination' => $destination,
-                    'asset'       => 'BTC',
-                    'quantity'    => $quantity,
-                    'type'        => self::TXN_TYPE_SEND
-                );
-
-                return $aResult;
-            }
-            throw $oException;
         }
-        $data = $aResult[4];
-        $type = hexdec(mb_substr($data, 0, 8));
-        $assetName = mb_substr($data, 8, 16);
-        $quantity = mb_substr($data, 24, 16);
-        $assetId =
-            new BigNumber(
-                BigNumber::convertToBase10($assetName, 16)
-            );
-        // if('00000000' != mb_substr($assetName, 0, 8)){
-        if('0' != mb_substr($assetName, 0, 1)){
-            $asset = 'A' . $assetId->getValue();
-        }else{
-            $asset = '';
-            $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            do{
-                $tmpAssetId = clone($assetId);
-                $reminder = (int)$tmpAssetId->mod(26)->getValue();
-                $asset .= $alphabet[$reminder];
-                $assetId = $assetId->divide(26)->floor();
-            }while($assetId->getValue() > 0);
-            $asset = strrev($asset);
-        }
-
-        switch($type){
-            case 0:
-                $type = self::TXN_TYPE_SEND;
-                break;
-            case 20:
-                $type = self::TXN_TYPE_ISSUANCE;
-                break;
-            default:
-                throw new UnexpectedValueException('Unknown/unsupported transaction type ' . $type);
-        }
-
-        $quantity =
-            new BigNumber(
-                BigNumber::convertToBase10($quantity, 16)
-            );
-
-        $aResult = array(
-            'source'      => $aResult[0],
-            'destination' => $aResult[1],
-            'asset'       => $asset,
-            'quantity'    => $quantity->getValue(),
-            'type'        => $type
-        );
-        */
         return $aResult;
     }
 
@@ -368,18 +264,8 @@ class Ethereum implements ILayer
      */
     public function decodeRawTx($rawData, $logResult = FALSE, $cacheResult = TRUE)
     {
-        $result = array();
-
-        /*
-        $result = $this->getRPC()->execBitcoind(
-            'decoderawtransaction',
-            array($rawData),
-            $logResult,
-            $cacheResult
-        );
-        */
-
-        return $result;
+        $data = $this->getRPC()->exec('eth-service', 'decodeRawTx', array($rawData), $logResult, $cacheResult);
+        return $data;
     }
 
     /**
