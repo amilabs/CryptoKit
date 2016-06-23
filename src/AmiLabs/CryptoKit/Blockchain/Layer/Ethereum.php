@@ -157,7 +157,8 @@ class Ethereum implements ILayer
      * @return array
      */
     public function getLastTransactions($logResult = FALSE){
-        return array();
+        $result = $this->getRPC()->exec('eth-service', 'getLastTransactions', array(), $logResult);
+        return is_array($result) ? $result : array();
     }
 
     /**
