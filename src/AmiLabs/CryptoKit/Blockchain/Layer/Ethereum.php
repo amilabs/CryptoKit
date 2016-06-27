@@ -290,7 +290,7 @@ class Ethereum implements ILayer
 
 
     /**
-     * Returns wallets/assets balances.er
+     * Returns wallets/assets balances.
      *
      * @param  array $aAssets       List of assets
      * @param  array $aWallets      List of wallets
@@ -316,7 +316,11 @@ class Ethereum implements ILayer
      * @return array
      */
     public function getFuelBalance($aAddresses, $logResult = FALSE){
-        $aResult = array('ETH' => 0);
+        $aResult = array();
+        $aData = $this->getRPC()->exec('eth-service', 'getFuelBalance', $aAddresses, $logResult, FALSE);
+        if(is_array($aData)){
+            $aResult = $aData;
+        }
         return $aResult;
     }
 
