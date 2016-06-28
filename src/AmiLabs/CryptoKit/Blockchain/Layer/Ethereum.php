@@ -193,7 +193,9 @@ class Ethereum implements ILayer
                 'destination' => $aData['to'],
                 'asset'       => $aData['asset'],
                 'quantity'    => $aData['quantity'],
-                'type'        => $aData['opType']
+                'type'        => $aData['opType'],
+                'gas'         => $aData['gas'],
+                'gasUsed'     => $aData['gasUsed']
             );
         }
         return $aResult;
